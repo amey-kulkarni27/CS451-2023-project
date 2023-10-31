@@ -1,11 +1,14 @@
 #include <chrono>
 #include <iostream>
 #include <thread>
+#include <fstream>
 
 #include "parser.hpp"
 #include "hello.h"
 #include <signal.h>
+#include "handler_t1.hpp"
 
+// Handler_T1 h;
 
 static void stop(int) {
   // reset signal handlers to default
@@ -63,9 +66,14 @@ int main(int argc, char **argv) {
   std::cout << "===============\n";
   std::cout << parser.configPath() << "\n\n";
 
+	
   std::cout << "Doing some initialization...\n\n";
 
+	Handler_T1 h;
+	h.initialise(parser.id(), hosts, parser.outputPath(), parser.configPath());
+
   std::cout << "Broadcasting and delivering messages...\n\n";
+	h.startExchange();
 
   // After a process finishes broadcasting,
   // it waits forever for the delivery of messages.
