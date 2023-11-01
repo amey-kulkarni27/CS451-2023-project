@@ -75,10 +75,32 @@ public:
 	}
 
 
+	void deliverMessage(std::string msg){
+		// 1) If one is received from PerfectLinks, spawn a thread to deal with it (optimisation)
+		// 2) Read the "_" separated messages (into strings) and log each of these messages into a queue
+
+		// RECEIVER CODE GOES HERE
+    size_t curpos = 0;
+    size_t found = msg.find('_');
+		while(found != std::string::npos){
+			std::string underlying_msg = msg.substr(curpos, found - curpos);
+			logs.push_back(underlying_msg);
+			curpos = found + 1;
+			found = msg.find('_', curpos);
+		}
+		if(logs.size() >= thresh)
+			flush(logs);
+
+		// Perfect Links
+		// receive packet, resend an ACK
+
+		// if packet received first time, go through the contents and log them, update the set of messages received, resend ACK
+		// if packet already received, discard and resend ACK
+	}
+
+
 	void startExchange(){
-		if(receiver)
-			receiveMessage();
-		else
+		if(!receiver)
 			sendMessage();
 	}
 
@@ -140,30 +162,6 @@ private:
 		}
 		return payload;
 	}
-
-	void receiveMessage(std::string msg){
-		// 1) If one is received from PerfectLinks, spawn a thread to deal with it (optimisation)
-		// 2) Read the "_" separated messages (into strings) and log each of these messages into a queue
-
-		// RECEIVER CODE GOES HERE
-    size_t curpos = 0;
-    size_t found = msg.find('_');
-		while(found != std::string::npos){
-			std::string underlying_msg = msg.substr(curpos, found - curpos);
-			logs.push_back(underlying_msg);
-			curpos = found + 1;
-			found = msg.find('_', curpos);
-		}
-		if(logs.size() >= thresh)
-			flush(logs);
-
-		// Perfect Links
-		// receive packet, resend an ACK
-
-		// if packet received first time, go through the contents and log them, update the set of messages received, resend ACK
-		// if packet already received, discard and resend ACK
-	}
-
 	void sendMessage(){
 		// 1) Create packets containing 8 messages
 		// 2) Log them and send them through the perfect links abstraction

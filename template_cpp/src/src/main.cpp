@@ -7,6 +7,8 @@
 #include "hello.h"
 #include <signal.h>
 #include "handler_t1.hpp"
+#include "pl_sender.hpp"
+#include "pl_receiver.hpp"
 
 // Handler_T1 h;
 
@@ -17,6 +19,8 @@ static void stop(int) {
 
   // immediately stop network packet processing
   std::cout << "Immediately stopping network packet processing.\n";
+	PLSender::stopALL();
+	PLReceiver::stopALL();
 
   // write/flush output file if necessary
   std::cout << "Writing output.\n";

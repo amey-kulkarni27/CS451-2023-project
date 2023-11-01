@@ -28,12 +28,15 @@ public:
 	void pp2pReceive(std::string ackMsg){
 		// get the ID of the message
 		// get stubborn links to stop sending that message
-		std::string ts_str = ackMsg.substr(0, ackMsg.find('_'));
-		unsigned long ts = std::stoul(ts_str);
+		unsigned long ts = std::stoul(ackMsg); // ackMsg is just a single number, as a string
 		std::pair<std::set<int>::iterator,bool> ret; // store return value of insert
 		ret = ackMsg.insert(ts);
 		if(ret -> second)
 			StubbornSender::sp2pStop(ts);
+	}
+
+	void stopAll(){
+		StubbornSender::stopAll();
 	}
 
 

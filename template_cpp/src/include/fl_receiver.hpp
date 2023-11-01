@@ -7,31 +7,25 @@
 #include <thread>
 
 #include <parser.hpp>
-#include <stubborn_sender.hpp>
+#include <stubborn_receiver.hpp>
 
 
-class FLSender(){
+class FLReceiver(){
 
 public:
-	FLSender(Parser::Host Receiver, Parser::Host Self){
+	FLReceiver(Parser::Host Self){
 		sock = socket(AF_INET, SOCK_DGRAM, 0);
 		if(sock == -1){
         perror("Failed to create socket");
         return 1;
     }
 
-		serverAddress.sin_family = AF_INET;
-    serverAddress.sin_port = htons(Receiver.portReadable());
-    serverAddress.sin_addr.s_addr = inet_addr(Receiver.ipReadable().c_str());
-
-		// activate listening
-		std::thread receiverThread(fp2pReceive);
-		receiverThread.detach();
-		// main function continues working as before
+		fp2pReceive();
 	}
 
-	void fp2pSend(std::string msg){
-		if(sendto(sock, msg.c_str(), msg.length(), 0, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1)
+	void fp2pSend(std::string msg, sockaddr_in clientAddress){
+		// Send the ACK to the client
+		if(sendto(sock, msg.c_str(), msg.length(), 0, (struct sockaddr*)&clientAddress, sizeof(clientAddress)) == -1)
 			perror("Error while sending the message.\n");
 	}
 
@@ -40,7 +34,7 @@ public:
 		if (close(sock) == 0) {
         std::cout << "Socket closed successfully." << std::endl;
     }
-	 	else {
+		else {
         std::cerr << "Failed to close the socket." << std::endl;
     }
 	}
@@ -48,12 +42,13 @@ public:
 private:
 	bool listen = true;
 	int sock;
-	sockaddr_in clientAddress, serverAddress;
 
 	void fp2pReceive(){
 		char buffer[1024];
+		sockaddr_in clientAddress;
+		socklen_t cAddrLen = sizeof(clientAddress);
 		while(listen){
-			ssize_t readLen = recvfrom(sock, buffer, sizeof(buffer), 0);
+			ssize_t readLen = recvfrom(sock, buffer, sizeof(buffer), 0, (struct sockaddr*)&clientAddress, &cAddrLen);
 			if(readLen == -1){
 				perror("Could not read the contents of the datagram(ACK) sent by the receiver.\n");
 				return;
@@ -62,7 +57,7 @@ private:
 			buffer[readLen] = '\0';
 
 			std::string recvMsg(buffer);
-			StubbornSender::sp2pReceive(recvMsg);
+			StubbornReceiver::sp2pReceive(recvMsg, clientAddress);
 		}
 	}
 

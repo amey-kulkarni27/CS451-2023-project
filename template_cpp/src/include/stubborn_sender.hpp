@@ -32,7 +32,12 @@ public:
 	}
 
 	void sp2pReceive(std::string msg){
-		PL_Sender::pp2pReceive(msg);
+		PLSender::pp2pReceive(msg);
+	}
+
+	void stopAll(){
+		keep_sending = false;
+		PLSender::stopAll();
 	}
 
 private:
