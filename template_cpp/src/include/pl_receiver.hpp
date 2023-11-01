@@ -40,4 +40,4 @@ private:
 		StubbornReceiver::sp2pSend(ts, clientAddress);
 	}
 
-}
+};

@@ -41,14 +41,15 @@ public:
 	}
 
 private:
-		std::map<unsigned long, std::string> tsToMsg;
-		bool keep_sending = true;
+	Parser::Host self, receiver;
+	std::map<unsigned long, std::string> tsToMsg;
+	bool keep_sending = true;
 
-		void continuousSend(){
-			while(keep_sending){
-				for(const auto& tm: tsToMsg){
-					FLSender::fp2pSend(tm.second);
-				}
+	static void continuousSend(){
+		while(keep_sending){
+			for(const auto& tm: tsToMsg){
+				FLSender::fp2pSend(tm.second);
 			}
 		}
-}
+	}
+};
