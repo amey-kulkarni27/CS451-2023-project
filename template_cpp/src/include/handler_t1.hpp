@@ -6,79 +6,13 @@
 #include <set>
 
 #include <parser.hpp> 
-#include <perfect_links.hpp> 
+#include <perfect_links_sender.hpp> 
+#include <perfect_links_receiver.hpp> 
 
 
 class Handler_T1 {
 
 public:
-
-	// Constructor named initialise, because we wanted to create a global object
-	void initialise(unsigned long Id, std::vector<Parser::Host> hosts, const char *outputPath, const char *configPath){
-		outPath = std::string(outputPath);
-		createHostMap(hosts);
-		id = Id; 
-		if(readParams(configPath, num_messages, target) == false) 
-			std::cerr<<"Failed to read parameters from the config file "<<std::endl; 
-	 
-		if(id == target) 
-			receiver = true; 	
-	}
-
-	void startExchange(){
-		if(receiver){
-			listening = true;
-			receiveMessage();
-		}
-		else
-			sendMessage();
-	}
-
-	void stopExchange(){
-		// Stop all threads, including the ones reading from the logs
-		flush();
-		// stop perfect links
-	}
-
-private:
-	map<unsigned long, Parser::Host> hostMap;
-	unsigned long id;
-	unsigned long num_messages;
-	unsigned long target;
-	bool receiver = false;
-	int send_id = 1;
-	bool listening = false;
-	queue<std::string> logs;
-	int thresh = 1000;
-	std::string outPath;
-
-	void createHostMap(std::vector<Parser::Host> hosts){
-		for (auto &host : hosts)
-			hostMap[host.id] = host;
-	}
-
-	bool readParams (const char *configPath, unsigned long &num_messages, unsigned long &target){
-		std::ifstream configFile(configPath);
-				
-		if(configFile.is_open()){
-			std::string firstLine;
-			if(getline(configFile, firstLine)){
-				std::istringstream iss(firstLine);
-				if(iss>>num_messages>>target){
-					return true;
-				}
-				else
-					std::cerr<<"Failed to read in the two integers "<<std::endl;
-			}
-			else
-				std::cerr<<"Failed to read the first line "<<std::endl;
-		
-		}
-		else
-			std::cerr<<"Failed to open config file "<<std::endl;
-		
-		return false;
-	}
 
 	void flush(){
 		// Make Separate for receiver
@@ -121,6 +55,86 @@ private:
     std::cout << "Contents have been written to the file: " << filePath << std::endl;
 	}
 
+
+	// Constructor named initialise, because we wanted to create a global object
+	void initialise(unsigned long Id, std::vector<Parser::Host> hosts, const char *outputPath, const char *configPath){
+		outPath = std::string(outputPath);
+		createHostMap(hosts);
+		id = Id; 
+		if(readParams(configPath, num_messages, target) == false) 
+			std::cerr<<"Failed to read parameters from the config file "<<std::endl; 
+	 
+		if(id == target) 
+			receiver = true; 	
+
+		// Initialise Perfect Links
+		if(receiver)
+			PLReceiver::PLReceiver(hostMap[id]);
+		else
+			PLSender::PLSender(hostMap[id], hostMap[target]);
+	}
+
+
+	void startExchange(){
+		if(receiver){
+			listening = true;
+			receiveMessage();
+		}
+		else
+			sendMessage();
+	}
+
+
+	void stopExchange(){
+		// Stop all threads, including the ones reading from the logs
+		listening = false;
+		// stop perfect links
+		if(receiver)
+			PLReceiver::stop();
+		else
+			PLSender::stop();
+	}
+
+private:
+	map<unsigned long, Parser::Host> hostMap;
+	unsigned long id;
+	unsigned long num_messages;
+	unsigned long target;
+	bool receiver = false;
+	int send_id = 1;
+	bool listening = false;
+	queue<std::string> logs;
+	int thresh = 1000;
+	std::string outPath;
+
+	void createHostMap(std::vector<Parser::Host> hosts){
+		for (auto &host : hosts)
+			hostMap[host.id] = host;
+	}
+
+	bool readParams (const char *configPath, unsigned long &num_messages, unsigned long &target){
+		std::ifstream configFile(configPath);
+				
+		if(configFile.is_open()){
+			std::string firstLine;
+			if(getline(configFile, firstLine)){
+				std::istringstream iss(firstLine);
+				if(iss>>num_messages>>target){
+					return true;
+				}
+				else
+					std::cerr<<"Failed to read in the two integers "<<std::endl;
+			}
+			else
+				std::cerr<<"Failed to read the first line "<<std::endl;
+		
+		}
+		else
+			std::cerr<<"Failed to open config file "<<std::endl;
+		
+		return false;
+	}
+
 	void messageHandler(std::string msg){
     size_t curpos = 0;
     size_t found = msg.find('_');
@@ -151,7 +165,7 @@ private:
 
 		// RECEIVER CODE GOES HERE
 		while(listening){
-			std::string receivedMsg = pp2pDeliver(host);
+			std::string receivedMsg = PLReceiver::pp2pReceive(); // same as deliver here
 			if(!receivedMsg.empty()){
 				// Declaring a new thread along with the code it executes through a lambda
 				std::thread messageHandler([this, receivedMsg]() {
@@ -176,7 +190,7 @@ private:
 		while(i < num_messages){
 			unsigned long end = std::min(i + 8, num_messages);
 			std::string msgToSend = createMsgAppendToLogs(i, end);
-			pp2pSend(msgToSend);
+			PLSender::pp2pSend(msgToSend);
 			// do this using a separate thread
 			flush(logs);
 			i = end;
