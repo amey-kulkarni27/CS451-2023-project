@@ -76,18 +76,14 @@ public:
 
 
 	void startExchange(){
-		if(receiver){
-			listening = true;
+		if(receiver)
 			receiveMessage();
-		}
 		else
 			sendMessage();
 	}
 
 
 	void stopExchange(){
-		// Stop all threads, including the ones reading from the logs
-		listening = false;
 		// stop perfect links
 		if(receiver)
 			PLReceiver::stop();
@@ -102,7 +98,6 @@ private:
 	unsigned long target;
 	bool receiver = false;
 	int send_id = 1;
-	bool listening = false;
 	queue<std::string> logs;
 	int thresh = 1000;
 	std::string outPath;
@@ -135,19 +130,6 @@ private:
 		return false;
 	}
 
-	void messageHandler(std::string msg){
-    size_t curpos = 0;
-    size_t found = msg.find('_');
-		while(found != std::string::npos){
-			std::string underlying_msg = msg.substr(curpos, found - curpos);
-			logs.push_back(underlying_msg);
-			curpos = found + 1;
-			found = msg.find('_', curpos);
-		}
-		if(logs.size() >= thresh)
-			flush(logs);
-	}
-
 	std::string createMsgAppendToLogs(unsigned long st, unsigned long en){
 		std::string payload = "";
 		while(st < en){
@@ -159,22 +141,21 @@ private:
 		return payload;
 	}
 
-	void receiveMessage(){
-		// 1) Always listen for an incoming message. If one is received from PerfectLinks, spawn a thread to deal with it
+	void receiveMessage(std::string msg){
+		// 1) If one is received from PerfectLinks, spawn a thread to deal with it (optimisation)
 		// 2) Read the "_" separated messages (into strings) and log each of these messages into a queue
 
 		// RECEIVER CODE GOES HERE
-		while(listening){
-			std::string receivedMsg = PLReceiver::pp2pReceive(); // same as deliver here
-			if(!receivedMsg.empty()){
-				// Declaring a new thread along with the code it executes through a lambda
-				std::thread messageHandler([this, receivedMsg]() {
-						// This code is executed in a new thread
-						handleMessage(receiveMsg);
-				});
-				messageHandler.detach();
-			}
+    size_t curpos = 0;
+    size_t found = msg.find('_');
+		while(found != std::string::npos){
+			std::string underlying_msg = msg.substr(curpos, found - curpos);
+			logs.push_back(underlying_msg);
+			curpos = found + 1;
+			found = msg.find('_', curpos);
 		}
+		if(logs.size() >= thresh)
+			flush(logs);
 
 		// Perfect Links
 		// receive packet, resend an ACK
