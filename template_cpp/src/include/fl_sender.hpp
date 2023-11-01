@@ -25,7 +25,7 @@ public:
     serverAddress.sin_addr.s_addr = inet_addr(Receiver.ipReadable().c_str());
 
 		// activate listening
-		std::thread receiverThread(fp2pReceive, sock);
+		std::thread receiverThread(fp2pReceive);
 		receiverThread.detach();
 		// main function continues working as before
 	}
