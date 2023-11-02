@@ -28,6 +28,10 @@ public:
 		PLSenderReceive::PLSenderReceive();
 	}
 
+	int getSocket(){
+		return sock;
+	}
+
 	void stopAll(){
 		listen = false;
 	}

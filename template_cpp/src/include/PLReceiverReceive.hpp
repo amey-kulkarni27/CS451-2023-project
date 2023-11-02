@@ -4,6 +4,7 @@
 #include <string>
 
 #include <parser.hpp>
+#include <FLReceiverSend.hpp>
 
 class PLReceiverReceive{
 	
@@ -39,7 +40,7 @@ private:
 
 	void pp2pSend(std::string ts_str, sockaddr_in clientAddress){
 		// send an ack, ie, just a timestamp
-		StubbornReceiver::sp2pSend(ts, clientAddress);
+		FLReceiverSend::fp2pSend(ts, clientAddress);
 	}
 
 	void deliver(std::string msg){

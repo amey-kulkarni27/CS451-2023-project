@@ -13,12 +13,8 @@
 class FLReceiverReceive(){
 
 public:
-	FLReceiverReceive(){
-		sock = socket(AF_INET, SOCK_DGRAM, 0);
-		if(sock == -1){
-        perror("Failed to create socket");
-        return 1;
-    }
+	FLReceiverReceive(int sock_){
+		sock = sock_;
 
 		PLReceiverReceive::PLReceiverReceive();
 		fp2pReceive();
@@ -43,17 +39,17 @@ private:
 				perror("Could not read the contents of the datagram(ACK) sent by the receiver.\n");
 				return;
 			}
-			if (close(sock) == 0) {
-					std::cout << "Socket closed successfully." << std::endl;
-			}
-			else {
-					std::cerr << "Failed to close the socket." << std::endl;
-			}
 			assert(readLen < 1024);
 			buffer[readLen] = '\0';
 
 			std::string recvMsg(buffer);
 			PLReceiverReceive::pp2pReceive(recvMsg, clientAddress);
+		}
+		if (close(sock) == 0) {
+				std::cout << "Socket closed successfully." << std::endl;
+		}
+		else {
+				std::cerr << "Failed to close the socket." << std::endl;
 		}
 	}
 
