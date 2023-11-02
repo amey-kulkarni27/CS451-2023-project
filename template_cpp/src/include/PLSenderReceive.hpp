@@ -5,13 +5,14 @@
 #include <set>
 
 #include <parser.hpp>
-#include <StubbornSenderSend.hpp>
+#include <Stubborn.hpp>
 
 // called by FLSenderReceive Exclusively
 class PLSenderReceive{
 	
 public:
-	PLSenderReceive(){
+	PLSenderReceive(Stubborn::Stubborn x){
+		this->s = x;
 	}
 
 	void pp2pReceive(std::string ackMsg){
@@ -21,11 +22,12 @@ public:
 		std::pair<std::set<int>::iterator,bool> ret; // store return value of insert
 		ret = ackMsg.insert(ts);
 		if(ret -> second)
-			StubbornSenderSend::sp2pStop(ts);
+			(this->s).sp2pStop(ts);
 	}
 
 
 private:
+	Stubborn::Stubborn s;
 	set<unsigned long> acked; // those messages that we have received an ACK for
 
 };

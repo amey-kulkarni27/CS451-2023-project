@@ -5,15 +5,20 @@
 #include <set>
 
 #include <parser.hpp>
-#include <StubbornSenderSend.hpp>
+#include <Stubborn.hpp>
 
 class PLSenderSend{
 	
 public:
-	PLSenderSend(Parser::Host Receiver, Parser::Host Self){
-		self = Self, receiver = Receiver;
+	Stubborn::Stubborn s;
 
-		StubbornSenderSend::StubbornSenderSend(self, receiver);
+	PLSenderSend(Parser::Host Receiver){
+		receiver = Receiver;
+		this->s = Stubborn::Stubborn(receiver);
+	}
+
+	int getSocket(){
+		return (this->s).getSocket();
 	}
 
 	void pp2pSend(std::string msg){
@@ -21,18 +26,17 @@ public:
 		// get stubborn links to infinitely send that message
 		unsigned long ts = id;
 		msg = std::to_string(ts) + "_" + msg;
-		StubbornSenderSend::sp2pSend(ts, msg);
+		(this->s).sp2pSend(ts, msg);
 		id++;
 	}
 
 	void stopAll(){
-		StubbornSenderSend::stopAll();
+		(this->s).stopAll();
 	}
 
 
 private:
 	Parser::Host receiver;
-	Parser::Host self;
 	unsigned long id = 0;
 
 };

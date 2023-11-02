@@ -9,23 +9,22 @@
 
 #include "parser.hpp"
 #include "PLSenderReceive.hpp"
+#include "Stubborn.hpp"
 
 
 class FLSenderReceive{
 
 public:
-	FLSenderReceive(){
-		sock = socket(AF_INET, SOCK_DGRAM, 0);
-		if(sock == -1){
-        perror("Failed to create socket");
-    }
+	FLSenderReceive(Stubborn::Stubborn s, int sock_){
+		sock = sock_;
+
+		this->psr = PLSenderReceive::PLSenderReceive(s);
 
 		// activate listening
 		std::thread receiverThread(&FLSenderReceive::fp2pReceive, this);
 		receiverThread.detach();
 		// main function continues working as before
 
-		PLSenderReceive::PLSenderReceive();
 	}
 
 	int getSocket(){
@@ -37,6 +36,7 @@ public:
 	}
 
 private:
+	PLSenderReceive::PLSenderReceive psr;
 	bool listen = true;
 	int sock;
 
@@ -52,7 +52,7 @@ private:
 			buffer[readLen] = '\0';
 
 			std::string recvMsg(buffer);
-			PLSenderReceive::pp2pReceive(recvMsg);
+			(this->psr).pp2pReceive(recvMsg);
 		}
 		if (close(sock) == 0) {
         std::cout << "Socket closed successfully." << std::endl;

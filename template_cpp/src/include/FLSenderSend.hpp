@@ -13,7 +13,7 @@
 class FLSenderSend{
 
 public:
-	FLSenderSend(Parser::Host Receiver, Parser::Host Self){
+	FLSenderSend(Parser::Host Receiver){
 		sock = socket(AF_INET, SOCK_DGRAM, 0);
 		if(sock == -1){
         perror("Failed to create socket");
@@ -23,6 +23,10 @@ public:
     serverAddress.sin_port = htons(Receiver.portReadable());
     serverAddress.sin_addr.s_addr = inet_addr(Receiver.ipReadable().c_str());
 
+	}
+
+	int getSocket(){
+		return sock;
 	}
 
 	void fp2pSend(std::string msg){
@@ -41,6 +45,6 @@ public:
 
 private:
 	int sock;
-	sockaddr_in clientAddress, serverAddress;
+	sockaddr_in serverAddress;
 
 };

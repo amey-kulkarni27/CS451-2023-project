@@ -6,18 +6,24 @@
 #include <thread>
 
 #include "parser.hpp"
-#include "FLSender.hpp"
+#include "FLSenderSend.hpp"
 
-class StubbornSenderSend{
+class Stubborn{
 
 public:
 
-	StubbornSenderSend(Parser::Host Receiver, Parser::Host Self){
-		self = Self, receiver = Receiver;
+	Stubborn(Parser::Host Receiver){
+		receiver = Receiver;
+
+		this->fss = FLSenderSend::FLSenderSend(receiver);
 
 		// use a separate thread
 		std::thread contSending(continuousSend);
 		contSending.detach();
+	}
+
+	int getSocket(){
+		return (this->fss).getSocket();
 	}
 
 	void sp2pSend(unsigned long ts, std::string msg){
@@ -30,18 +36,19 @@ public:
 
 	void stopAll(){
 		keep_sending = false;
-		FLSender::stopAll();
+		(this->fss).stopAll();
 	}
 
 private:
-	Parser::Host self, receiver;
+	FLSenderSend::FLSenderSend fss;
+	Parser::Host receiver;
 	std::map<unsigned long, std::string> tsToMsg;
 	bool keep_sending = true;
 
 	static void continuousSend(){
 		while(keep_sending){
 			for(const auto& tm: tsToMsg){
-				FLSender::fp2pSend(tm.second);
+				(this->fss).fp2pSend(tm.second);
 			}
 		}
 	}

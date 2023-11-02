@@ -6,9 +6,14 @@
 #include <set>
 
 #include <parser.hpp> 
-#include <PLSenderSend.hpp> 
-#include <FLSenderReceiver.hpp> 
-#include <FLReceiverReceive.hpp> 
+
+// Sender side
+#include "PLSenderSend.hpp" 
+#include "Stubborn.hpp"
+#include "FLSenderReceive.hpp" 
+
+// Receiver side
+#include "FLReceiverReceive.hpp" 
 
 
 class HandlerT1 {
@@ -74,9 +79,8 @@ public:
 			this -> frr = FLReceiverReceive::FLReceiverReceive();
 		}
 		else{
-			this -> fsr = FLSenderReceive::FLSenderReceive();
-			int sock_ = (this -< fsr).getSocket();
-			this -> fss = FLSenderSend::FLSenderSend(sock_);
+			this -> pss = PLSenderSend::PLSenderSend();
+			this -> fsr = FLSenderReceive::FLSenderReceive((this->pss).s, (this->pss).getSocket());
 		}
 	}
 
@@ -121,6 +125,8 @@ public:
 
 private:
 	Helper::Helper helper;
+	PLSenderSend::PLSenderSend pss;
+	FLSenderReceive::FLSenderReceive fsr;
 
 	map<unsigned long, Parser::Host> hostMap;
 	unsigned long id;
