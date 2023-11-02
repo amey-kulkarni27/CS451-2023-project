@@ -6,11 +6,10 @@
 #include "parser.hpp"
 #include "hello.h"
 #include <signal.h>
-#include "handler_t1.hpp"
-#include "pl_sender.hpp"
-#include "pl_receiver.hpp"
+#include "HandlerT1.hpp"
+#include "PLSender.hpp"
+#include "PLReceiver.hpp"
 
-// Handler_T1 h;
 
 static void stop(int) {
   // reset signal handlers to default
@@ -73,7 +72,7 @@ int main(int argc, char **argv) {
 	
   std::cout << "Doing some initialization...\n\n";
 
-	Handler_T1 h;
+	HandlerT1 h;
 	h.initialise(parser.id(), hosts, parser.outputPath(), parser.configPath());
 
   std::cout << "Broadcasting and delivering messages...\n\n";
