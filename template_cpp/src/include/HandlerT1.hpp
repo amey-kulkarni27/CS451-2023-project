@@ -8,7 +8,6 @@
 #include <parser.hpp> 
 #include <PLSenderSend.hpp> 
 #include <FLSenderReceiver.hpp> 
-#include <PLReceiverSend.hpp> 
 #include <FLReceiverReceive.hpp> 
 
 
@@ -61,7 +60,7 @@ public:
 	// Constructor named initialise, because we wanted to create a global object
 	void initialise(unsigned long Id, std::vector<Parser::Host> hosts, const char *outputPath, const char *configPath){
 		outPath = std::string(outputPath);
-		Helper::Helper(outPath);
+		this -> helper = Helper::Helper(outPath);
 		createHostMap(hosts);
 		id = Id; 
 		if(readParams(configPath, num_messages, target) == false) 
@@ -72,14 +71,12 @@ public:
 
 		// Initialise Perfect Links
 		if(receiver){
-			FLReceiverSend::FLReceiverSend flrs;
-			int sock_ = flrs.getSocket();
-			FLReceiverReceive::FLReceiverReceive(sock_);
+			this -> frr = FLReceiverReceive::FLReceiverReceive();
 		}
 		else{
-			FLSenderReceive::FLSenderReceive obj;
-			int sock_ = obj.getSocket();
-			FLSenderSend::FLSenderSend(sock_);
+			this -> fsr = FLSenderReceive::FLSenderReceive();
+			int sock_ = (this -< fsr).getSocket();
+			this -> fss = FLSenderSend::FLSenderSend(sock_);
 		}
 	}
 
@@ -117,12 +114,14 @@ public:
 	void stopExchange(){
 		// stop perfect links
 		if(receiver)
-			PLReceiver::stop();
+			f;
 		else
 			PLSender::stop();
 	}
 
 private:
+	Helper::Helper helper;
+
 	map<unsigned long, Parser::Host> hostMap;
 	unsigned long id;
 	unsigned long num_messages;

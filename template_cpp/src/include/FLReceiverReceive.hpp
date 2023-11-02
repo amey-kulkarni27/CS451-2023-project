@@ -13,21 +13,28 @@
 class FLReceiverReceive(){
 
 public:
-	FLReceiverReceive(int sock_){
-		sock = sock_;
+	FLReceiverReceive(){
 
-		PLReceiverReceive::PLReceiverReceive();
+		sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if(sock == -1){
+        perror("Failed to create socket");
+        return 1;
+    }
+
+		// sending socket for the FLsend function to use
+		this -> pr = PLReceiverReceive::PLReceiverReceive(sock);
 		fp2pReceive();
 	}
 
 	void stopAll(){
-		PLReceiverReceive::stopAll();
+		(this->pr).stopAll();
 		listen = false;
 	}
 
 private:
 	bool listen = true;
 	int sock;
+	PLReceiver::PLReceiver pr;
 
 	void fp2pReceive(){
 		char buffer[1024];
@@ -43,7 +50,7 @@ private:
 			buffer[readLen] = '\0';
 
 			std::string recvMsg(buffer);
-			PLReceiverReceive::pp2pReceive(recvMsg, clientAddress);
+			(this->fr)pp2pReceive(recvMsg, clientAddress);
 		}
 		if (close(sock) == 0) {
 				std::cout << "Socket closed successfully." << std::endl;
