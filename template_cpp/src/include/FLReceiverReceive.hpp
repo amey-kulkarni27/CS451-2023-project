@@ -50,7 +50,7 @@ private:
 			buffer[readLen] = '\0';
 
 			std::string recvMsg(buffer);
-			(this->fr)pp2pReceive(recvMsg, clientAddress);
+			(this->fr).pp2pReceive(recvMsg, clientAddress);
 		}
 		if (close(sock) == 0) {
 				std::cout << "Socket closed successfully." << std::endl;

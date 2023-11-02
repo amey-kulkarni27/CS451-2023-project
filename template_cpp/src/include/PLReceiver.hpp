@@ -6,10 +6,11 @@
 #include <parser.hpp>
 #include <FLReceiverSend.hpp>
 
-class PLReceiverReceive{
+class PLReceive{
 	
 public:
-	PLReceiverReceive(){
+	PLReceive(int sock){
+		this->frs = FLReceiverSend::FLReceiverSend(sock);
 	}
 
 	void pp2pReceive(std::string msg, sockaddr_in clientAddress){
@@ -34,13 +35,14 @@ public:
 
 
 private:
+	FLReceiverSend::FLReceiverSend frs;
 	std::set<unsigned long> delivered; // lighter to store numbers in the set rather than strings
 	Parser::Host self;
 	queue<std::string> logs;
 
 	void pp2pSend(std::string ts_str, sockaddr_in clientAddress){
 		// send an ack, ie, just a timestamp
-		FLReceiverSend::fp2pSend(ts, clientAddress);
+		(this->frs).fp2pSend(ts, clientAddress);
 	}
 
 	void deliver(std::string msg){

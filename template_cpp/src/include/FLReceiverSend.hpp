@@ -12,23 +12,14 @@
 class FLReceiverSend(){
 
 public:
-	FLReceiverSend(){
-		sock = socket(AF_INET, SOCK_DGRAM, 0);
-		if(sock == -1){
-        perror("Failed to create socket");
-        return 1;
-    }
+	FLReceiverSend(int sock_){
+		sock = sock_;
 	}
-
-	int getSocket(){
-		return sock;
-	}
-
 
 	void fp2pSend(std::string msg, sockaddr_in clientAddress){
 		// Send the ACK to the client
 		if(sendto(sock, msg.c_str(), msg.length(), 0, (struct sockaddr*)&clientAddress, sizeof(clientAddress)) == -1)
-			perror("Error while sending the message.\n");
+			perror("Error while sending the ACK.\n");
 	}
 
 
