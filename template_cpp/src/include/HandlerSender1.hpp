@@ -71,9 +71,9 @@ private:
 	void sendMessage(){
 		// 1) Create packets containing 8 messages
 		// 2) Log them and send them through the perfect links abstraction
-		unsigned long i = 0;
-		while(i < num_messages){
-			unsigned long end = std::min(i + 8, num_messages);
+		unsigned long i = 1;
+		while(i <= num_messages){
+			unsigned long end = std::min(i + 8, num_messages + 1);
 			std::string msgToSend = createMsgAppendToLogs(i, end);
 			(this->pss).pp2pSend(msgToSend);
 			// do this using a separate thread

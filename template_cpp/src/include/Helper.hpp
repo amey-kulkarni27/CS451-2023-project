@@ -53,7 +53,7 @@ public:
 		std::string outPath(o_path);
 
     // Make Separate for receiver
-    std::string filePath = outPath + "/" + std::to_string(id) + ".txt";
+    std::string filePath = outPath;
     // Check if the file exists
     struct stat buffer;
     if (stat(filePath.c_str(), &buffer) == 0) {
