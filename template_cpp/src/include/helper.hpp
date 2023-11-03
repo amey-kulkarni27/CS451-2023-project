@@ -1,14 +1,21 @@
+#pragma once
+
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <queue>
+#include <sys/stat.h>
 
 
 class Helper {
 
 public:
 
-  static void flush(std::queue<std::string> &logs, const char *o_path){
+  static void flush(std::queue<std::string> &logs, const char *o_path, unsigned long id){
+
+		// Convert const char * to string
+		std::string outPath(o_path);
+
     // Make Separate for receiver
     std::string filePath = outPath + "/" + std::to_string(id) + ".txt";
     // Check if the file exists

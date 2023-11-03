@@ -3,9 +3,10 @@
 #include <iostream> 
 #include <sstream>
 #include <string>
-#include <set>
+#include <map>
 
 #include <parser.hpp> 
+#include <helper.hpp>
 
 // Sender side
 #include "PLSenderSend.hpp" 
@@ -20,46 +21,6 @@ class HandlerT1 {
 
 public:
 
-	void flush(){
-		// Make Separate for receiver
-		std::string filePath = outPath + "/" + std::to_string(id) + ".txt";
-		// Check if the file exists
-    struct stat buffer;
-    if (stat(filePath.c_str(), &buffer) == 0) {
-        // File exists, open it in append mode
-        std::ofstream outputFile(filePath, std::ios::app);
-        
-        if (!outputFile.is_open()) {
-            std::cerr << "Error opening the file for appending: " << filePath << std::endl;
-            return;
-        }
-        
-        // Append each underlying_msg from the logs to the file
-        while (!logs.empty()) {
-            const std::string& underlying_msg = logs.front();
-            outputFile << underlying_msg << std::endl; // Append the underlying_msg to the file
-            logs.pop(); // Remove the processed underlying_msg from the queue
-        }
-    }
-	 	else {
-        // File doesn't exist, create a new file
-        std::ofstream outputFile(filePath);
-        
-        if (!outputFile.is_open()) {
-            std::cerr << "Error creating the file: " << filePath << std::endl;
-            return;
-        }
-        
-        // Write each underlying_msg from the queue to the file
-        while (!logs.empty()) {
-            const std::string& underlying_msg = logs.front();
-            outputFile << underlying_msg << std::endl; // Write the underlying_msg to the file
-            logs.pop(); // Remove the processed underlying_msg from the queue
-        }
-    }
-    
-    std::cout << "Contents have been written to the file: " << filePath << std::endl;
-	}
 
 
 	// Constructor named initialise, because we wanted to create a global object
@@ -75,7 +36,7 @@ public:
 
 		// Initialise Perfect Links
 		if(receiver){
-			this -> frr = FLReceiverReceive::FLReceiverReceive(outPath);
+			this -> frr = FLReceiverReceive::FLReceiverReceive(outPath, id);
 		}
 		else{
 			this -> pss = PLSenderSend::PLSenderSend();
@@ -98,7 +59,7 @@ public:
 			found = msg.find('_', curpos);
 		}
 		if(logs.size() >= thresh)
-			flush(logs);
+			Helper::flush(logs, outPath, id);
 
 		// Perfect Links
 		// receive packet, resend an ACK
@@ -109,7 +70,7 @@ public:
 
 
 	void startExchange(){
-		else
+		if(!receiver)
 			sendMessage();
 	}
 
@@ -117,16 +78,20 @@ public:
 	void stopExchange(){
 		// stop perfect links
 		if(receiver)
-			f;
-		else
-			PLSender::stop();
+			(this->frr).stopAll();
+		else{
+			(this->pss).stopAll();
+			(this->fsr).stopAll();
+		}
+
 	}
 
 private:
-	PLSenderSend::PLSenderSend pss;
-	FLSenderReceive::FLSenderReceive fsr;
+	FLReceiverReceive frr;
+	PLSenderSend pss;
+	FLSenderReceive fsr;
 
-	map<unsigned long, Parser::Host> hostMap;
+	std::map<unsigned long, Parser::Host> hostMap;
 	unsigned long id;
 	unsigned long num_messages;
 	unsigned long target;
@@ -183,7 +148,7 @@ private:
 			std::string msgToSend = createMsgAppendToLogs(i, end);
 			PLSender::pp2pSend(msgToSend);
 			// do this using a separate thread
-			flush(logs);
+			Helper::flush(logs, outPath, id);
 			i = end;
 		}
 

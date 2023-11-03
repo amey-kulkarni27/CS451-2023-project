@@ -12,7 +12,15 @@
 class FLReceiverSend{
 
 public:
-	FLReceiverSend(int sock_) : sock(sock_){
+	FLReceiverSend(){
+		sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if(sock == -1){
+        perror("Failed to create socket");
+    }
+	}
+
+	int getSocket(){
+		return sock;
 	}
 
 	void fp2pSend(std::string msg, sockaddr_in clientAddress){

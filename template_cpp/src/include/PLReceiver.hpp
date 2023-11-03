@@ -6,11 +6,16 @@
 
 #include <parser.hpp>
 #include <FLReceiverSend.hpp>
+#include <helper.hpp>
 
-class PLReceive{
+class PLReceiver{
 	
 public:
-	PLReceive(int sock, const char *oPath) : frs(sock), outPath(oPath){
+	PLReceiver(const char *oPath, unsigned long Id) : frs(), outPath(oPath), id(Id){
+	}
+
+	int getSocket(){
+		return (this->frs).getSocket();
 	}
 
 	void pp2pReceive(std::string msg, sockaddr_in clientAddress){
@@ -37,10 +42,11 @@ public:
 private:
 	FLReceiverSend frs;
 	const char *outPath;
+	unsigned long id;
 	std::set<unsigned long> delivered; // lighter to store numbers in the set rather than strings
 	Parser::Host self;
 	std::queue<std::string> logs;
-	int thresh = 5;
+	unsigned long thresh = 5;
 
 	void pp2pSend(std::string ts_str, sockaddr_in clientAddress){
 		// send an ack, ie, just a timestamp
@@ -61,7 +67,7 @@ private:
 			found = msg.find('_', curpos);
 		}
 		if(logs.size() >= thresh)
-			callFlush(logs);
+			callFlush();
 
 		// Perfect Links
 		// receive packet, resend an ACK
@@ -71,7 +77,7 @@ private:
 	}
 
 	void callFlush(){
-		Helper::flush(logs, outPath);
+		Helper::flush(logs, outPath, id);
 	}
 
 };
