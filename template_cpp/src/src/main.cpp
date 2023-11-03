@@ -76,6 +76,7 @@ int main(int argc, char **argv) {
 
 	// Finding out the parameters
 	unsigned long target, num_messages;
+	Helper::removeFile(parser.outputPath());
 	if(Helper::readParams(parser.configPath(), num_messages, target) == false)
 		std::cerr<<"Failed to read parameters from the config file "<<std::endl;
 
