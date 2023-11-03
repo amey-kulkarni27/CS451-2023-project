@@ -15,7 +15,21 @@
 class FLSenderReceive{
 
 public:
-	FLSenderReceive(Stubborn s, int sock_) : sock(sock_), psr(s){
+	FLSenderReceive(Stubborn s, int sock_, const char *ip_self, unsigned short port_self) : sock(sock_), psr(s){
+
+		// bind listener
+		sockaddr_in myAddress;
+		memset(&myAddress, 0, sizeof(myAddress));
+		myAddress.sin_family = AF_INET;
+		myAddress.sin_port = htons(port_self);
+		myAddress.sin_addr.s_addr = inet_addr(ip_self);
+
+    if (bind(sock, reinterpret_cast<struct sockaddr *>(&myAddress), sizeof(myAddress)) < 0) {
+        perror("Bind failed");
+        close(sock);
+        exit(1);
+    }
+
 
 		// activate listening
 		std::thread receiverThread(&FLSenderReceive::fp2pReceive, this);

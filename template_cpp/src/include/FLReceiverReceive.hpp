@@ -13,9 +13,21 @@
 class FLReceiverReceive{
 
 public:
-	FLReceiverReceive(const char *oPath, unsigned long Id) : pr(oPath, Id){
+	FLReceiverReceive(const char *oPath, unsigned long Id, const char *ip, unsigned short port) : pr(oPath, Id){
 		Helper::printText("FLReceiverReceive");
 		sock = (this->pr).getSocket();
+
+		sockaddr_in serverAddress;
+		memset(&serverAddress, 0, sizeof(serverAddress));
+    serverAddress.sin_family = AF_INET;
+    serverAddress.sin_port = htons(port);
+    serverAddress.sin_addr.s_addr = inet_addr(ip);
+
+		if (bind(sock, reinterpret_cast<struct sockaddr *>(&serverAddress), sizeof(serverAddress)) < 0) {
+        perror("Bind failed");
+        close(sock);
+        exit(1);
+    }
 
 		std::thread receiverThread(&FLReceiverReceive::fp2pReceive, this);
 		receiverThread.detach();
@@ -33,6 +45,7 @@ private:
 
 	void fp2pReceive(){
 		char buffer[1024];
+
 		sockaddr_in clientAddress;
 		socklen_t cAddrLen = sizeof(clientAddress);
 

@@ -88,11 +88,12 @@ int main(int argc, char **argv) {
 
 	unsigned long curId = parser.id();
 	if(curId == target){
-		HandlerReceiver1 h(curId, parser.outputPath());
+		HandlerReceiver1 h(curId, parser.outputPath(), targetDetails.ipReadable().c_str(), targetDetails.portReadable());
 		receivePtr = &h;
 	}
 	else{
-		HandlerSender1 h(curId, parser.outputPath(), num_messages, target, targetDetails.ipReadable().c_str(), targetDetails.portReadable());
+		Parser::Host curDetails = Helper::getReceiverInfo(hosts, curId);
+		HandlerSender1 h(curId, parser.outputPath(), num_messages, target, targetDetails.ipReadable().c_str(), targetDetails.portReadable(), curDetails.ipReadable().c_str(), curDetails.portReadable());
 		std::cout << "Broadcasting and delivering messages...\n\n";
 		sendPtr = &h;
 		h.startExchange();
@@ -102,7 +103,9 @@ int main(int argc, char **argv) {
   // After a process finishes broadcasting,
   // it waits forever for the delivery of messages.
   while (true) {
+		Helper::printText("Num 3");
     std::this_thread::sleep_for(std::chrono::hours(1));
+		Helper::printText("Num 4");
   }
 
   return 0;

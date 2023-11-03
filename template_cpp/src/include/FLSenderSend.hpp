@@ -7,6 +7,7 @@
 #include <cassert>
 
 #include "parser.hpp"
+#include "Helper.hpp"
 
 
 class FLSenderSend{
@@ -17,6 +18,8 @@ public:
 		if(sock == -1){
         perror("Failed to create socket");
     }
+		Helper::printText("Hey there");
+		std::cout<<sock<<std::endl;
 
 		serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(port);

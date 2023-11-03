@@ -6,6 +6,8 @@
 #include <thread>
 
 #include "parser.hpp"
+#include "Helper.hpp"
+
 #include "FLSenderSend.hpp"
 
 class Stubborn{
@@ -44,6 +46,7 @@ private:
 
 	void continuousSend(){
 		while(keep_sending){
+			Helper::printText("Printing");
 			for(const auto& tm: tsToMsg){
 				(this->fss).fp2pSend(tm.second);
 			}

@@ -18,13 +18,14 @@ class HandlerSender1 {
 public:
 
 	// Constructor named initialise, because we wanted to create a global object
-	HandlerSender1(unsigned long Id, const char *outputPath, unsigned long num_messages_, unsigned long target_, const char *ip, unsigned short port) : pss(ip, port){
+	HandlerSender1(unsigned long Id, const char *outputPath, unsigned long num_messages_, unsigned long target_, const char *ip, unsigned short port, const char *ip_self, unsigned short port_self) : pss(ip, port){
 		outPath = outputPath;
 		id = Id; 
 		num_messages = num_messages_;
 		target = target_;
 	 
-		initReceiver();
+		initReceiver(ip_self, port_self);
+		Helper::printText("Here!!");
 	}
 
 
@@ -52,8 +53,8 @@ private:
 	unsigned thresh = 5;
 	const char *outPath;
 
-	void initReceiver(){
-		FLSenderReceive fsr((this->pss).s, (this->pss).getSocket());
+	void initReceiver(const char *ip_self, unsigned short port_self){
+		FLSenderReceive fsr((this->pss).s, (this->pss).getSocket(), ip_self, port_self);
 		this -> fsrptr = &fsr;
 	}
 
