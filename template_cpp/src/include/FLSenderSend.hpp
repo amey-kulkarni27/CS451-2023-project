@@ -12,15 +12,15 @@
 class FLSenderSend{
 
 public:
-	FLSenderSend(Parser::Host Receiver){
+	FLSenderSend(const char *ip, unsigned short port){
 		sock = socket(AF_INET, SOCK_DGRAM, 0);
 		if(sock == -1){
         perror("Failed to create socket");
     }
 
 		serverAddress.sin_family = AF_INET;
-    serverAddress.sin_port = htons(Receiver.portReadable());
-    serverAddress.sin_addr.s_addr = inet_addr(Receiver.ipReadable().c_str());
+    serverAddress.sin_port = htons(port);
+    serverAddress.sin_addr.s_addr = inet_addr(ip);
 
 	}
 

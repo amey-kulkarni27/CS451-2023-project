@@ -74,13 +74,18 @@ int main(int argc, char **argv) {
 	int target, num_messages;
 	if(readParams(configPath, num_messages, target) == false)
 		std::cerr<<"Failed to read parameters from the config file "<<std::endl;
+
+	Parser::Host targetDetails = getReceiverInfo(hosts, target);
 	
   std::cout << "Doing some initialization...\n\n";
 
 	int curId = parser.id();
-	if(curId == target)
-		HandlerReceiver1 h(parser.outputPath(), num_messages, target);
-	else
+	if(curId == target){
+		HandlerReceiver1 h(curId, parser.outputPath());
+	}
+	else{
+		HandlerSend1 h(curId, parser.outputPath(), num_messages, target, targetDetails.ipReadable().c_str(), portReadable());
+	}
 
 	h_global = &h;
 

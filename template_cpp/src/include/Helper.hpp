@@ -4,12 +4,25 @@
 #include <sstream>
 #include <string>
 #include <queue>
+#include <map>
+#include <cassert>
 #include <sys/stat.h>
+
+#include "parser.hpp"
 
 
 class Helper {
 
 public:
+
+	static Parser::Host getReceiverInfo(std::vector<Parser::Host> hosts, int target){
+		Parser::Host dummy;
+		for (auto &host : hosts)
+		if(host.id == target)
+			return host;
+		assert(false);
+		return dummy;
+	}
 
  	static bool readParams (const char *configPath, unsigned long &num_messages, unsigned long &target){
 		std::ifstream configFile(configPath);

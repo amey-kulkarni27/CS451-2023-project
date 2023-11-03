@@ -10,10 +10,9 @@
 class PLSenderSend{
 	
 public:
-	Parser::Host receiver;
 	Stubborn s;
 
-	PLSenderSend(Parser::Host Receiver) : receiver(Receiver), s(Receiver){
+	PLSenderSend(const char *ip, unsigned short port) : s(ip, port){
 	}
 
 	int getSocket(){

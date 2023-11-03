@@ -19,22 +19,11 @@ class HandlerSender1 {
 public:
 
 	// Constructor named initialise, because we wanted to create a global object
-	HandlerSender1(unsigned long Id, std::vector<Parser::Host> hosts, const char *outputPath, int target_, int num_messages_){
+	HandlerSender1(unsigned long Id, const char *outputPath, int num_messages_, int target_, const char *ip, unsigned short port) : pss(ip, port){
 		outPath = outputPath;
-		createHostMap(hosts);
 		id = Id; 
 	 
-		if(id == target) 
-			receiver = true; 	
-
-		// Initialise Perfect Links
-		if(receiver){
-			this -> frr = FLReceiverReceive(outPath, id);
-		}
-		else{
-			this -> pss = PLSenderSend(hostMap[target]);
-			this -> fsr = FLSenderReceive((this->pss).s, (this->pss).getSocket());
-		}
+		initReceiver();
 	}
 
 
@@ -63,40 +52,32 @@ public:
 
 
 	void startExchange(){
-		if(!receiver)
-			sendMessage();
+		sendMessage();
 	}
 
 
 	void stopExchange(){
 		// stop perfect links
-		if(receiver)
-			(this->frr).stopAll();
-		else{
-			(this->pss).stopAll();
-			(this->fsr).stopAll();
-		}
+		(this->pss).stopAll();
+		(this->fsrptr) -> stopAll();
 
 	}
 
 private:
-	FLReceiverReceive frr;
 	PLSenderSend pss;
-	FLSenderReceive fsr;
+	FLSenderReceive *fsrptr;
 
-	std::map<unsigned long, Parser::Host> hostMap;
 	unsigned long id;
 	unsigned long num_messages;
 	unsigned long target;
 	bool receiver = false;
-	int send_id = 1;
 	std::queue<std::string> logs;
 	unsigned thresh = 5;
 	const char *outPath;
 
-	void createHostMap(std::vector<Parser::Host> hosts){
-		for (auto &host : hosts)
-			hostMap[host.id] = host;
+	void initReceiver(){
+		FLSenderReceive fsr((this->pss).s, (this->pss).getSocket());
+		this -> fsrptr = &fsr;
 	}
 
 	std::string createMsgAppendToLogs(unsigned long st, unsigned long en){
@@ -109,6 +90,7 @@ private:
 		}
 		return payload;
 	}
+
 	void sendMessage(){
 		// 1) Create packets containing 8 messages
 		// 2) Log them and send them through the perfect links abstraction

@@ -24,10 +24,6 @@ public:
 
 	}
 
-	int getSocket(){
-		return sock;
-	}
-
 	void stopAll(){
 		listen = false;
 	}
