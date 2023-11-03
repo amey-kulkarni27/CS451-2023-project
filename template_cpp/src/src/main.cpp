@@ -7,19 +7,16 @@
 #include "hello.h"
 #include <signal.h>
 #include "HandlerT1.hpp"
-#include "PLSender.hpp"
-#include "PLReceiver.hpp"
 
 
-static void stop(int) {
+static void stop(HandlerT1::HandlerT1 h) {
   // reset signal handlers to default
   signal(SIGTERM, SIG_DFL);
   signal(SIGINT, SIG_DFL);
 
   // immediately stop network packet processing
   std::cout << "Immediately stopping network packet processing.\n";
-	PLSender::stopALL();
-	PLReceiver::stopALL();
+	h.stopAll();
 
   // write/flush output file if necessary
   std::cout << "Writing output.\n";
@@ -29,8 +26,14 @@ static void stop(int) {
 }
 
 int main(int argc, char **argv) {
-  signal(SIGTERM, stop);
-  signal(SIGINT, stop);
+	HHandlerT1::andlerT1 h;
+
+	signal(SIGTERM, [h](int signal){
+		stop(h);
+	});
+	signal(SIGINT, [h](int signal){
+		stop(h);
+	});
 
   // `true` means that a config file is required.
   // Call with `false` if no config file is necessary.
@@ -72,7 +75,6 @@ int main(int argc, char **argv) {
 	
   std::cout << "Doing some initialization...\n\n";
 
-	HandlerT1 h;
 	h.initialise(parser.id(), hosts, parser.outputPath(), parser.configPath());
 
   std::cout << "Broadcasting and delivering messages...\n\n";
