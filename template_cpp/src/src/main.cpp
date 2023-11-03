@@ -6,17 +6,20 @@
 #include "parser.hpp"
 #include "hello.h"
 #include <signal.h>
+
 #include "HandlerT1.hpp"
 
+Handler *h_global = nullptr;
 
-static void stop(HandlerT1::HandlerT1 h) {
+static void stop() {
   // reset signal handlers to default
   signal(SIGTERM, SIG_DFL);
   signal(SIGINT, SIG_DFL);
 
   // immediately stop network packet processing
   std::cout << "Immediately stopping network packet processing.\n";
-	h.stopAll();
+	if(h_global != nullptr)
+		h_global -> stopExchange();
 
   // write/flush output file if necessary
   std::cout << "Writing output.\n";
@@ -26,14 +29,9 @@ static void stop(HandlerT1::HandlerT1 h) {
 }
 
 int main(int argc, char **argv) {
-	HHandlerT1::andlerT1 h;
 
-	signal(SIGTERM, [h](int signal){
-		stop(h);
-	});
-	signal(SIGINT, [h](int signal){
-		stop(h);
-	});
+	signal(SIGTERM, stop);
+	signal(SIGINT, stop);
 
   // `true` means that a config file is required.
   // Call with `false` if no config file is necessary.
@@ -72,10 +70,19 @@ int main(int argc, char **argv) {
   std::cout << "===============\n";
   std::cout << parser.configPath() << "\n\n";
 
+	// Finding out the parameters
+	int target, num_messages;
+	if(readParams(configPath, num_messages, target) == false)
+		std::cerr<<"Failed to read parameters from the config file "<<std::endl;
 	
   std::cout << "Doing some initialization...\n\n";
 
-	h.initialise(parser.id(), hosts, parser.outputPath(), parser.configPath());
+	int curId = parser.id();
+	if(curId == target)
+		HandlerReceiver1 h(parser.outputPath(), num_messages, target);
+	else
+
+	h_global = &h;
 
   std::cout << "Broadcasting and delivering messages...\n\n";
 	h.startExchange();

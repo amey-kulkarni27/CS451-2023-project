@@ -13,7 +13,7 @@
 class FLReceiverReceive{
 
 public:
-	FLReceiverReceive(const char *oPath, unsigned long Id): pr(oPath, Id){
+	FLReceiverReceive(const char *oPath, unsigned long Id) : pr(oPath, Id){
 
 		sock = (this->pr).getSocket();
 		fp2pReceive();

@@ -13,16 +13,13 @@
 #include "Stubborn.hpp"
 #include "FLSenderReceive.hpp" 
 
-// Receiver side
-#include "FLReceiverReceive.hpp" 
 
-
-class HandlerT1 {
+class HandlerSender1 {
 
 public:
 
 	// Constructor named initialise, because we wanted to create a global object
-	HandlerT1(unsigned long Id, std::vector<Parser::Host> hosts, const char *outputPath, int target_, int num_messages_){
+	HandlerSender1(unsigned long Id, std::vector<Parser::Host> hosts, const char *outputPath, int target_, int num_messages_){
 		outPath = outputPath;
 		createHostMap(hosts);
 		id = Id; 
