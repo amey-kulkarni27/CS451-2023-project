@@ -65,7 +65,6 @@ public:
 	// Constructor named initialise, because we wanted to create a global object
 	void initialise(unsigned long Id, std::vector<Parser::Host> hosts, const char *outputPath, const char *configPath){
 		outPath = std::string(outputPath);
-		this -> helper = Helper::Helper(outPath);
 		createHostMap(hosts);
 		id = Id; 
 		if(readParams(configPath, num_messages, target) == false) 
@@ -76,7 +75,7 @@ public:
 
 		// Initialise Perfect Links
 		if(receiver){
-			this -> frr = FLReceiverReceive::FLReceiverReceive();
+			this -> frr = FLReceiverReceive::FLReceiverReceive(outPath);
 		}
 		else{
 			this -> pss = PLSenderSend::PLSenderSend();
@@ -124,7 +123,6 @@ public:
 	}
 
 private:
-	Helper::Helper helper;
 	PLSenderSend::PLSenderSend pss;
 	FLSenderReceive::FLSenderReceive fsr;
 

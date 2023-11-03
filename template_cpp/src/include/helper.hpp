@@ -8,11 +8,7 @@ class Helper {
 
 public:
 
-	Helper(const char *o_path){
-		outPath = o_path;
-	}
-
-  void flush(std::queue<std::string> &logs){
+  static void flush(std::queue<std::string> &logs, const char *o_path){
     // Make Separate for receiver
     std::string filePath = outPath + "/" + std::to_string(id) + ".txt";
     // Check if the file exists
@@ -53,6 +49,4 @@ public:
     std::cout << "Contents have been written to the file: " << filePath << std::endl;
   }
 
-private:
-	const char *outPath;
 };

@@ -13,7 +13,7 @@
 class FLReceiverReceive(){
 
 public:
-	FLReceiverReceive(){
+	FLReceiverReceive(const char *oPath) : outPath(oPath){
 
 		sock = socket(AF_INET, SOCK_DGRAM, 0);
     if(sock == -1){
@@ -34,6 +34,7 @@ public:
 private:
 	bool listen = true;
 	int sock;
+	const char *outPath;
 	PLReceiver::PLReceiver pr;
 
 	void fp2pReceive(){
