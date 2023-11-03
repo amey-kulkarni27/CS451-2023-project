@@ -12,14 +12,16 @@ class Stubborn{
 
 public:
 
-	Stubborn(Parser::Host Receiver){
-		receiver = Receiver;
-
-		this->fss = FLSenderSend::FLSenderSend(receiver);
+	// Using a member initialiser list to 
+	Stubborn(Parser::Host Receiver) : receiver(Receiver), fss(Receiver){
 
 		// use a separate thread
-		std::thread contSending(continuousSend);
+		std::thread contSending(&Stubborn::continuousSend, this);
 		contSending.detach();
+	}
+
+	// Creating a copy constructor
+	Stubborn(const Stubborn &x) : receiver(x.receiver), fss(x.fss){
 	}
 
 	int getSocket(){
@@ -40,12 +42,12 @@ public:
 	}
 
 private:
-	FLSenderSend::FLSenderSend fss;
 	Parser::Host receiver;
+	FLSenderSend fss;
 	std::map<unsigned long, std::string> tsToMsg;
 	bool keep_sending = true;
 
-	static void continuousSend(){
+	void continuousSend(){
 		while(keep_sending){
 			for(const auto& tm: tsToMsg){
 				(this->fss).fp2pSend(tm.second);

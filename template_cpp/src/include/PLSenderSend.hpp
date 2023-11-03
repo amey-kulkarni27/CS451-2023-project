@@ -10,11 +10,10 @@
 class PLSenderSend{
 	
 public:
-	Stubborn::Stubborn s;
+	Parser::Host receiver;
+	Stubborn s;
 
-	PLSenderSend(Parser::Host Receiver){
-		receiver = Receiver;
-		this->s = Stubborn::Stubborn(receiver);
+	PLSenderSend(Parser::Host Receiver) : receiver(Receiver), s(Receiver){
 	}
 
 	int getSocket(){
@@ -36,7 +35,6 @@ public:
 
 
 private:
-	Parser::Host receiver;
 	unsigned long id = 0;
 
 };

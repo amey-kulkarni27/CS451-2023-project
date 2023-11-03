@@ -11,23 +11,22 @@
 class PLSenderReceive{
 	
 public:
-	PLSenderReceive(Stubborn::Stubborn x){
-		this->s = x;
+	PLSenderReceive(Stubborn x): s(x){
 	}
 
 	void pp2pReceive(std::string ackMsg){
 		// get the ID of the message
 		// get stubborn links to stop sending that message
 		unsigned long ts = std::stoul(ackMsg); // ackMsg is just a single number, as a string
-		std::pair<std::set<int>::iterator,bool> ret; // store return value of insert
-		ret = ackMsg.insert(ts);
-		if(ret -> second)
+		std::pair<std::set<unsigned long>::iterator,bool> ret; // store return value of insert
+		ret = acked.insert(ts);
+		if(ret.second)
 			(this->s).sp2pStop(ts);
 	}
 
 
 private:
-	Stubborn::Stubborn s;
-	set<unsigned long> acked; // those messages that we have received an ACK for
+	Stubborn s;
+	std::set<unsigned long> acked; // those messages that we have received an ACK for
 
 };
