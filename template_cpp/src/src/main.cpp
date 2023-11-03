@@ -10,17 +10,20 @@
 #include "HandlerSender1.hpp"
 #include "HandlerReceiver1.hpp"
 
-Handler *h_global = nullptr;
+HandlerSender1 *sendPtr = nullptr;
+HandlerReceiver1 *receivePtr = nullptr;
 
-static void stop() {
+static void stop(int) {
   // reset signal handlers to default
   signal(SIGTERM, SIG_DFL);
   signal(SIGINT, SIG_DFL);
 
   // immediately stop network packet processing
   std::cout << "Immediately stopping network packet processing.\n";
-	if(h_global != nullptr)
-		h_global -> stopExchange();
+	if(receivePtr	!= nullptr)
+		receivePtr -> stopExchange();
+	if(sendPtr != nullptr)
+		sendPtr -> stopExchange();
 
   // write/flush output file if necessary
   std::cout << "Writing output.\n";
@@ -72,25 +75,26 @@ int main(int argc, char **argv) {
   std::cout << parser.configPath() << "\n\n";
 
 	// Finding out the parameters
-	int target, num_messages;
-	if(readParams(configPath, num_messages, target) == false)
+	unsigned long target, num_messages;
+	if(Helper::readParams(parser.configPath(), num_messages, target) == false)
 		std::cerr<<"Failed to read parameters from the config file "<<std::endl;
 
-	Parser::Host targetDetails = getReceiverInfo(hosts, target);
+	Parser::Host targetDetails = Helper::getReceiverInfo(hosts, target);
 	
   std::cout << "Doing some initialization...\n\n";
 
-	int curId = parser.id();
+	unsigned long curId = parser.id();
 	if(curId == target){
 		HandlerReceiver1 h(curId, parser.outputPath());
+		receivePtr = &h;
 	}
 	else{
-		HandlerSend1 h(curId, parser.outputPath(), num_messages, target, targetDetails.ipReadable().c_str(), portReadable());
+		HandlerSender1 h(curId, parser.outputPath(), num_messages, target, targetDetails.ipReadable().c_str(), targetDetails.portReadable());
 		std::cout << "Broadcasting and delivering messages...\n\n";
+		sendPtr = &h;
 		h.startExchange();
 	}
 
-	h_global = &h;
 
 
   // After a process finishes broadcasting,

@@ -18,9 +18,11 @@ class HandlerSender1 {
 public:
 
 	// Constructor named initialise, because we wanted to create a global object
-	HandlerSender1(unsigned long Id, const char *outputPath, int num_messages_, int target_, const char *ip, unsigned short port) : pss(ip, port){
+	HandlerSender1(unsigned long Id, const char *outputPath, unsigned long num_messages_, unsigned long target_, const char *ip, unsigned short port) : pss(ip, port){
 		outPath = outputPath;
 		id = Id; 
+		num_messages = num_messages_;
+		target = target_;
 	 
 		initReceiver();
 	}

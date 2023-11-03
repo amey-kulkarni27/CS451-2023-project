@@ -15,7 +15,7 @@ class Helper {
 
 public:
 
-	static Parser::Host getReceiverInfo(std::vector<Parser::Host> hosts, int target){
+	static Parser::Host getReceiverInfo(std::vector<Parser::Host> hosts, unsigned long target){
 		Parser::Host dummy;
 		for (auto &host : hosts)
 		if(host.id == target)
