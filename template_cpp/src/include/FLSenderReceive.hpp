@@ -15,7 +15,7 @@
 class FLSenderReceive{
 
 public:
-	FLSenderReceive(Stubborn::Stubborn s, int sock_) : sock(sock_), psr(s){
+	FLSenderReceive(Stubborn s, int sock_) : sock(sock_), psr(s){
 
 		// activate listening
 		std::thread receiverThread(&FLSenderReceive::fp2pReceive, this);
@@ -33,9 +33,9 @@ public:
 	}
 
 private:
+	int sock;
 	PLSenderReceive psr;
 	bool listen = true;
-	int sock;
 
 	void fp2pReceive(){
 		char buffer[1024];
