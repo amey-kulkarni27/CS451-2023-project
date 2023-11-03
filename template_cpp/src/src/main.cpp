@@ -7,7 +7,8 @@
 #include "hello.h"
 #include <signal.h>
 
-#include "HandlerT1.hpp"
+#include "HandlerSender1.hpp"
+#include "HandlerReceiver1.hpp"
 
 Handler *h_global = nullptr;
 
@@ -85,12 +86,12 @@ int main(int argc, char **argv) {
 	}
 	else{
 		HandlerSend1 h(curId, parser.outputPath(), num_messages, target, targetDetails.ipReadable().c_str(), portReadable());
+		std::cout << "Broadcasting and delivering messages...\n\n";
+		h.startExchange();
 	}
 
 	h_global = &h;
 
-  std::cout << "Broadcasting and delivering messages...\n\n";
-	h.startExchange();
 
   // After a process finishes broadcasting,
   // it waits forever for the delivery of messages.

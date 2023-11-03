@@ -10,7 +10,6 @@
 
 // Sender side
 #include "PLSenderSend.hpp" 
-#include "Stubborn.hpp"
 #include "FLSenderReceive.hpp" 
 
 
@@ -24,30 +23,6 @@ public:
 		id = Id; 
 	 
 		initReceiver();
-	}
-
-
-	void deliverMessage(std::string msg){
-		// 1) If one is received from PerfectLinks, spawn a thread to deal with it (optimisation)
-		// 2) Read the "_" separated messages (into strings) and log each of these messages into a queue
-
-		// RECEIVER CODE GOES HERE
-    size_t curpos = 0;
-    size_t found = msg.find('_');
-		while(found != std::string::npos){
-			std::string underlying_msg = msg.substr(curpos, found - curpos);
-			logs.push(underlying_msg);
-			curpos = found + 1;
-			found = msg.find('_', curpos);
-		}
-		if(logs.size() >= thresh)
-			Helper::flush(logs, outPath, id);
-
-		// Perfect Links
-		// receive packet, resend an ACK
-
-		// if packet received first time, go through the contents and log them, update the set of messages received, resend ACK
-		// if packet already received, discard and resend ACK
 	}
 
 
