@@ -20,8 +20,10 @@ static void stop(int) {
 
   // immediately stop network packet processing
   std::cout << "Immediately stopping network packet processing.\n";
-	if(receivePtr	!= nullptr)
+	if(receivePtr	!= nullptr){
+		Helper::printText("HERE I STAND!");
 		receivePtr -> stopExchange();
+	}
 	if(sendPtr != nullptr)
 		sendPtr -> stopExchange();
 
@@ -95,7 +97,6 @@ int main(int argc, char **argv) {
 		sendPtr = &h;
 		h.startExchange();
 	}
-
 
 
   // After a process finishes broadcasting,

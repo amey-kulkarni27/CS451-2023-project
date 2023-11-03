@@ -16,6 +16,14 @@ class Helper {
 
 public:
 
+	static void printThreadId(){
+		std::cout<<std::this_thread::get_id()<<std::endl;
+	}
+
+	static void printText(std::string s){
+		std::cout<<s<<std::endl;
+	}
+
 	static void removeFile(const char *outPath){
 		if (std::remove(outPath) != 0) {
 				// If the file could not be removed, an error occurred

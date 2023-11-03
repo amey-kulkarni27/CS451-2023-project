@@ -14,9 +14,11 @@ class FLReceiverReceive{
 
 public:
 	FLReceiverReceive(const char *oPath, unsigned long Id) : pr(oPath, Id){
-
+		Helper::printText("FLReceiverReceive");
 		sock = (this->pr).getSocket();
-		fp2pReceive();
+
+		std::thread receiverThread(&FLReceiverReceive::fp2pReceive, this);
+		receiverThread.detach();
 	}
 
 	void stopAll(){
@@ -33,8 +35,11 @@ private:
 		char buffer[1024];
 		sockaddr_in clientAddress;
 		socklen_t cAddrLen = sizeof(clientAddress);
+
 		while(listen){
 			ssize_t readLen = recvfrom(sock, buffer, sizeof(buffer), 0, reinterpret_cast<struct sockaddr *>(&clientAddress), &cAddrLen);
+			Helper::printText("Finally");
+			std::cout<<readLen<<std::endl;
 			if(readLen == -1){
 				perror("Could not read the contents of the datagram(ACK) sent by the receiver.\n");
 				return;

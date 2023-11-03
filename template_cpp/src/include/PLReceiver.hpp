@@ -12,6 +12,7 @@ class PLReceiver{
 	
 public:
 	PLReceiver(const char *oPath, unsigned long Id) : frs(), outPath(oPath), id(Id){
+		Helper::printText("PLReceiver!");
 	}
 
 	int getSocket(){
