@@ -13,7 +13,6 @@ class FLReceiverSend{
 
 public:
 	FLReceiverSend(){
-		Helper::printText("FLReceiverSend!");
 		sock = socket(AF_INET, SOCK_DGRAM, 0);
     if(sock == -1){
         perror("Failed to create socket");

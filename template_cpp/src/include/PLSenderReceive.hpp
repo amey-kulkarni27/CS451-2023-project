@@ -21,8 +21,6 @@ public:
 		// get the ID of the message
 		// get stubborn links to stop sending that message
 
-		Helper::printText("PLRECEIVER TURN");
-		Helper::printText(ackMsg);
 		unsigned long ts = std::stoul(ackMsg); // ackMsg is just a single number, as a string
 		std::pair<std::set<unsigned long>::iterator,bool> ret; // store return value of insert
 		ret = acked.insert(ts);

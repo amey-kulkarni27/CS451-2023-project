@@ -18,8 +18,6 @@ public:
 		if(sock == -1){
         perror("Failed to create socket");
     }
-		Helper::printText("Hey there");
-		std::cout<<sock<<std::endl;
 
 		serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(port);
@@ -33,10 +31,7 @@ public:
 
 	void fp2pSend(std::string msg){
 		if(sendto(sock, msg.c_str(), msg.length(), 0, reinterpret_cast<struct sockaddr*>(&serverAddress), sizeof(serverAddress)) == -1){
-			std::cout<<sock<<std::endl;
-			std::cout<<msg<<" "<<msg.length()<<std::endl;
 			perror("Error while sending the message.\n");
-			std::cout<<msg<<" "<<msg.length()<<std::endl;
 		}
 	}
 

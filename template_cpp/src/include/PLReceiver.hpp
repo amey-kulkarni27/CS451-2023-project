@@ -14,7 +14,6 @@ class PLReceiver{
 	
 public:
 	PLReceiver(const char *oPath) : frs(), outPath(oPath){
-		Helper::printText("PLReceiver!");
 	}
 
 	int getSocket(){
@@ -28,20 +27,12 @@ public:
 		size_t firstUnderscore = msg.find('_');
 		std::string idStr = msg.substr(0, firstUnderscore);
 		size_t secondUnderscore = msg.find('_', firstUnderscore + 1);
-		std::string tsStr = msg.substr(firstUnderscore + 1, secondUnderscore);
+		std::string tsStr = msg.substr(firstUnderscore + 1, secondUnderscore - firstUnderscore - 1);
 		std::string msgWithoutId = msg.substr(secondUnderscore + 1); // there will always be something to the right of the second underscore
 		pp2pSend(tsStr, clientAddress);
-		Helper::printText("CUSP OF ERROR");
-		Helper::printText(msg);
-		Helper::printText(idStr);
-		Helper::printText(tsStr);
     unsigned long id = std::stoul(idStr);
     unsigned long ts = std::stoul(tsStr);
-		Helper::printText("JUST AT THE DELIVERY");
-		Helper::printText(msg);
-		std::cout<<id<<" "<<ts<<std::endl;
     if(delivered.find(id) == delivered.end() || delivered[id].find(ts) == delivered[id].end()){
-			Helper::printText("DELIVERED BIT");
 			delivered[id].insert(ts);
 			deliver(msgWithoutId, id);
 			// deliver the message
@@ -59,7 +50,7 @@ private:
 	std::unordered_map<unsigned long, std::unordered_set<unsigned long>> delivered;
 	Parser::Host self;
 	std::queue<std::pair<unsigned long, std::string> > logs;
-	unsigned long thresh = 5;
+	unsigned long thresh = 1000;
 
 	void pp2pSend(std::string ts_str, sockaddr_in clientAddress){
 		// send an ack, ie, just a timestamp
@@ -79,7 +70,6 @@ private:
 			curpos = found + 1;
 			found = msg.find('_', curpos);
 		}
-		std::cout<<logs.size()<<std::endl;
 		if(logs.size() >= thresh)
 			callFlush();
 

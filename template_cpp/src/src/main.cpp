@@ -21,7 +21,6 @@ static void stop(int) {
   // immediately stop network packet processing
   std::cout << "Immediately stopping network packet processing.\n";
 	if(receivePtr	!= nullptr){
-		Helper::printText("HERE I STAND!");
 		receivePtr -> stopExchange();
 	}
 	if(sendPtr != nullptr)
@@ -91,9 +90,7 @@ int main(int argc, char **argv) {
 		HandlerReceiver1 h(parser.outputPath(), targetDetails.ipReadable().c_str(), targetDetails.portReadable());
 		receivePtr = &h;
 		while (true) {
-			Helper::printText("Num 3");
 			std::this_thread::sleep_for(std::chrono::hours(1));
-			Helper::printText("Num 4");
 		}
 	}
 	else{
@@ -104,10 +101,7 @@ int main(int argc, char **argv) {
 		sendPtr = &h;
 		h.startExchange();
 		while (true) {
-			Helper::printText("Num 3");
-			std::cout<<h.pss.getSocket()<<std::endl;
 			std::this_thread::sleep_for(std::chrono::hours(1));
-			Helper::printText("Num 4");
 		}
 	}
 

@@ -30,8 +30,6 @@ public:
 	}
 
 	void initReceiver(const char *ip_self, unsigned short port_self){
-		Helper::printText("INITRECEIVING");
-		std::cout<<(this->pss).getSocket()<<std::endl;
 		std::unique_ptr<FLSenderReceive> fsr = std::make_unique<FLSenderReceive>(&((this->pss).s), (this->pss).getSocket(), ip_self, port_self);
 		// Transfers ownership
 		this -> fsrptr = std::move(fsr);
@@ -46,6 +44,7 @@ public:
 
 	void stopExchange(){
 		// stop perfect links
+		Helper::flush(logs, outPath, false);
 		(this->pss).stopAll();
 		(this->fsrptr) -> stopAll();
 
@@ -57,7 +56,7 @@ private:
 	unsigned long target;
 	bool receiver = false;
 	std::queue<std::pair<unsigned long, std::string> > logs;
-	unsigned thresh = 5;
+	unsigned thresh = 500;
 	const char *outPath;
 
 	std::string createMsgAppendToLogs(unsigned long st, unsigned long en){
@@ -84,9 +83,6 @@ private:
 			i = end;
 		}
 		
-		Helper::printText("AYOOOOOOOOOOOO");
-		std::cout<<pss.getSocket()<<std::endl;
-
 		// std::this_thread::sleep_for(std::chrono::seconds(1));
 
 		// Perfect Links

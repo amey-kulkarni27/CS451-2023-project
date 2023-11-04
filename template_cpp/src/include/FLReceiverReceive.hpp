@@ -49,19 +49,15 @@ private:
 		socklen_t cAddrLen = sizeof(clientAddress);
 
 		while(listen){
-			Helper::printText("Come on!");
 			ssize_t readLen = recvfrom(sock, buffer, sizeof(buffer), 0, reinterpret_cast<struct sockaddr *>(&clientAddress), &cAddrLen);
-			Helper::printText("Finally");
-			std::cout<<readLen<<std::endl;
 			if(readLen == -1){
 				perror("Could not read the contents of the datagram(ACK) sent by the receiver.\n");
-				return;
+				break;
 			}
 			assert(readLen < 1024);
 			buffer[readLen] = '\0';
 
 			std::string recvMsg(buffer);
-			Helper::printText(recvMsg);
 			(this->pr).pp2pReceive(recvMsg, clientAddress);
 		}
 		if (close(sock) == 0) {

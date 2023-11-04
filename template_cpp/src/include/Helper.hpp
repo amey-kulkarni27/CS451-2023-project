@@ -118,7 +118,6 @@ public:
         }
     }
 
-    std::cout << "Contents have been written to the file: " << filePath << std::endl;
   }
 
 };

@@ -14,7 +14,6 @@ public:
 
 	// Constructor named initialise, because we wanted to create a global object
 	HandlerReceiver1(const char *outputPath, const char *ip, unsigned short port) : frr(outputPath, ip, port){
-		Helper::printText("Handler Receiver!");
 	}
 
 	void stopExchange(){

@@ -18,8 +18,6 @@ class FLSenderReceive{
 public:
 	FLSenderReceive(Stubborn *s, int sock_, const char *ip_self, unsigned short port_self) : sockNum(sock_), psr(s){
 
-		Helper::printText("FLSENDER RECEIVE");
-		std::cout<<sockNum<<std::endl;
 		// bind listener
 		sockaddr_in myAddress;
 		memset(&myAddress, 0, sizeof(myAddress));
@@ -54,16 +52,11 @@ private:
 	void fp2pReceive(){
 		char buffer[1024];
 		// std::this_thread::sleep_for(std::chrono::seconds(1));
-		Helper::printText("KETS GO");
-		std::cout<<listen<<std::endl;
-		std::cout<<sockNum<<std::endl;
 		while(listen){
 			ssize_t readLen = recvfrom(sockNum, buffer, sizeof(buffer), 0, NULL, NULL);
 			if(readLen == -1){
 				perror("Could not read the contents of the datagram(ACK) sent by the receiver.\n");
 			}
-			else
-				Helper::printText("HIWAEFHOIUFHAOWEIUHAUIFHIUOWEHF");
 			assert(readLen < 1024);
 			buffer[readLen] = '\0';
 
