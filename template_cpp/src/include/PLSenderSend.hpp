@@ -16,6 +16,7 @@ public:
 	Stubborn s;
 
 	PLSenderSend(unsigned long id_, const char *ip, unsigned short port) : s(ip, port), id(id_){
+		Helper::printText("PLSENDERSEND");
 	}
 
 	int getSocket(){
@@ -25,11 +26,12 @@ public:
 	void pp2pSend(std::string msg){
 		// append ts to the start of the message so that the receiver knows
 		// get stubborn links to infinitely send that message
+		Helper::printText("HERE WE GO");
 		msg = std::to_string(ts) + "_" + msg;
-		ts++;
 		// Also add the id so receiver knows who they have received the message from
 		msg = std::to_string(id) + "_" + msg;
 		(this->s).sp2pSend(ts, msg);
+		ts++;
 	}
 
 	void stopAll(){

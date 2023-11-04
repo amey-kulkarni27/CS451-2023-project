@@ -90,23 +90,30 @@ int main(int argc, char **argv) {
 	if(curId == target){
 		HandlerReceiver1 h(parser.outputPath(), targetDetails.ipReadable().c_str(), targetDetails.portReadable());
 		receivePtr = &h;
+		while (true) {
+			Helper::printText("Num 3");
+			std::this_thread::sleep_for(std::chrono::hours(1));
+			Helper::printText("Num 4");
+		}
 	}
 	else{
 		Parser::Host curDetails = Helper::getReceiverInfo(hosts, curId);
 		HandlerSender1 h(curId, parser.outputPath(), num_messages, target, targetDetails.ipReadable().c_str(), targetDetails.portReadable(), curDetails.ipReadable().c_str(), curDetails.portReadable());
+		// std::this_thread::sleep_for(std::chrono::seconds(1));
 		std::cout << "Broadcasting and delivering messages...\n\n";
 		sendPtr = &h;
 		h.startExchange();
+		while (true) {
+			Helper::printText("Num 3");
+			std::cout<<h.pss.getSocket()<<std::endl;
+			std::this_thread::sleep_for(std::chrono::hours(1));
+			Helper::printText("Num 4");
+		}
 	}
 
 
   // After a process finishes broadcasting,
   // it waits forever for the delivery of messages.
-  while (true) {
-		Helper::printText("Num 3");
-    std::this_thread::sleep_for(std::chrono::hours(1));
-		Helper::printText("Num 4");
-  }
 
   return 0;
 }

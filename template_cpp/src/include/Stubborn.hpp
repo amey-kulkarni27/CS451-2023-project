@@ -3,7 +3,9 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
+#include <cassert>
 #include <thread>
+#include <chrono>
 #include <mutex>
 
 #include "parser.hpp"
@@ -14,9 +16,12 @@
 class Stubborn{
 
 public:
+	std::unordered_map<unsigned long, std::string> tsToMsg;
 
 	// Using a member initialiser list to 
 	Stubborn(const char *ip, unsigned short port) :fss(ip, port){
+		Helper::printText("STUBBORN");
+		prt = port;
 
 		// use a separate thread
 		std::thread contSending(&Stubborn::continuousSend, this);
@@ -29,47 +34,54 @@ public:
 
 	void sp2pSend(unsigned long ts, std::string msg){
 		Helper::printText("SEND");
-		std::lock_guard<std::mutex> lock(mapLock);
+		const std::lock_guard<std::mutex> lock(mapLock);
+		std::cout<<&tsToMsg<<std::endl;
 		tsToMsg[ts] = msg;
-		for(auto const& [key, val]: tsToMsg){
-			Helper::printText("Printing");
-			Helper::printText(val);
-			Helper::printText(this->tsToMsg[1]);
-			(this->fss).fp2pSend(val);
-		}
+		std::cout<<"MAIN: "<<tsToMsg.size()<<std::endl;
 	}
 
 	void sp2pStop(unsigned long ts){
 		Helper::printText("STOP");
-		std::lock_guard<std::mutex> lock(mapLock);
+		const std::lock_guard<std::mutex> lock(mapLock);
 		tsToMsg.erase(ts);
 	}
 
 	void stopAll(){
+		Helper::printText("STOP");
 		keep_sending = false;
 		(this->fss).stopAll();
 	}
 
 private:
 	FLSenderSend fss;
-	std::unordered_map<unsigned long, std::string> tsToMsg;
 	std::mutex mapLock;
 	bool keep_sending = true;
+	unsigned short prt = 0;
 
-	void flood(){
-		std::lock_guard<std::mutex> lock(mapLock);
+	int flood(){
+		const std::lock_guard<std::mutex> lock(mapLock);
+		if(tsToMsg.size() == 0)
+			return 0;
+		// std::cout<<"THREAD: "<<tsToMsg.size()<<std::endl;
 		for(auto const& [key, val]: tsToMsg){
-			Helper::printText("Printing");
-			Helper::printText(val);
-			Helper::printText(this->tsToMsg[1]);
+			// Helper::printText("Above");
+			// std::cout<<key<<" "<<val<<std::endl;
+			// Helper::printText("Below");
 			(this->fss).fp2pSend(val);
 		}
+		return 1;
 	}
 
 	void continuousSend(){
 		
+		std::cout<<"THREAD: "<<tsToMsg.size()<<std::endl;
+		std::cout<<prt<<std::endl;
+		std::cout<<&tsToMsg<<std::endl;
+		std::cout<<tsToMsg.size()<<std::endl;
 		while(keep_sending){
-			flood();
+			if(flood() == 0)
+				std::this_thread::sleep_for(std::chrono::nanoseconds(10));
 		}
+		Helper::printText("Cont Send Thread terminates");
 	}
 };
