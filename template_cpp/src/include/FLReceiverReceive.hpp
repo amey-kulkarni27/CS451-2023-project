@@ -14,7 +14,6 @@ class FLReceiverReceive{
 
 public:
 	FLReceiverReceive(const char *oPath, const char *ip, unsigned short port) : pr(oPath){
-		Helper::printText("FLReceiverReceive");
 		sock = (this->pr).getSocket();
 
 		sockaddr_in serverAddress;
@@ -62,6 +61,7 @@ private:
 			buffer[readLen] = '\0';
 
 			std::string recvMsg(buffer);
+			Helper::printText(recvMsg);
 			(this->pr).pp2pReceive(recvMsg, clientAddress);
 		}
 		if (close(sock) == 0) {

@@ -66,7 +66,7 @@ public:
 		return false;
 	}
 
-  static void flush(std::queue<std::pair<unsigned long, std::string> > logs, const char *o_path, bool receiver){
+  static void flush(std::queue<std::pair<unsigned long, std::string> > &logs, const char *o_path, bool receiver){
 
 		// Convert const char * to string
 		std::string outPath(o_path);

@@ -31,9 +31,17 @@ public:
 		std::string tsStr = msg.substr(firstUnderscore + 1, secondUnderscore);
 		std::string msgWithoutId = msg.substr(secondUnderscore + 1); // there will always be something to the right of the second underscore
 		pp2pSend(tsStr, clientAddress);
+		Helper::printText("CUSP OF ERROR");
+		Helper::printText(msg);
+		Helper::printText(idStr);
+		Helper::printText(tsStr);
     unsigned long id = std::stoul(idStr);
     unsigned long ts = std::stoul(tsStr);
+		Helper::printText("JUST AT THE DELIVERY");
+		Helper::printText(msg);
+		std::cout<<id<<" "<<ts<<std::endl;
     if(delivered.find(id) == delivered.end() || delivered[id].find(ts) == delivered[id].end()){
+			Helper::printText("DELIVERED BIT");
 			delivered[id].insert(ts);
 			deliver(msgWithoutId, id);
 			// deliver the message
@@ -71,6 +79,7 @@ private:
 			curpos = found + 1;
 			found = msg.find('_', curpos);
 		}
+		std::cout<<logs.size()<<std::endl;
 		if(logs.size() >= thresh)
 			callFlush();
 

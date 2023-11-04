@@ -4,8 +4,10 @@
 #include <string>
 #include <set>
 
-#include <parser.hpp>
-#include <Stubborn.hpp>
+#include "parser.hpp"
+#include "Helper.hpp"
+
+#include "Stubborn.hpp"
 
 // called by FLSenderReceive Exclusively
 class PLSenderReceive{
@@ -18,6 +20,9 @@ public:
 	void pp2pReceive(std::string ackMsg){
 		// get the ID of the message
 		// get stubborn links to stop sending that message
+
+		Helper::printText("PLRECEIVER TURN");
+		Helper::printText(ackMsg);
 		unsigned long ts = std::stoul(ackMsg); // ackMsg is just a single number, as a string
 		std::pair<std::set<unsigned long>::iterator,bool> ret; // store return value of insert
 		ret = acked.insert(ts);
