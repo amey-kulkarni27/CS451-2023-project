@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <thread>
 #include <mutex>
 
@@ -31,6 +31,12 @@ public:
 		Helper::printText("SEND");
 		std::lock_guard<std::mutex> lock(mapLock);
 		tsToMsg[ts] = msg;
+		for(auto const& [key, val]: tsToMsg){
+			Helper::printText("Printing");
+			Helper::printText(val);
+			Helper::printText(this->tsToMsg[1]);
+			(this->fss).fp2pSend(val);
+		}
 	}
 
 	void sp2pStop(unsigned long ts){
@@ -46,25 +52,23 @@ public:
 
 private:
 	FLSenderSend fss;
-	std::map<unsigned long, std::string> tsToMsg;
+	std::unordered_map<unsigned long, std::string> tsToMsg;
 	std::mutex mapLock;
 	bool keep_sending = true;
 
 	void flood(){
-		Helper::printText("FLOOD");
 		std::lock_guard<std::mutex> lock(mapLock);
-		for(const std::pair<unsigned long, std::string>& tm: tsToMsg){
+		for(auto const& [key, val]: tsToMsg){
 			Helper::printText("Printing");
-			std::cout<<tm.first<<std::endl;
-			Helper::printText(tm.second);
+			Helper::printText(val);
 			Helper::printText(this->tsToMsg[1]);
-			(this->fss).fp2pSend(tm.second);
+			(this->fss).fp2pSend(val);
 		}
 	}
 
 	void continuousSend(){
+		
 		while(keep_sending){
-			std::cout<<tsToMsg.size()<<std::endl;
 			flood();
 		}
 	}
