@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <queue>
+#include <memory>
 
 #include "parser.hpp" 
 #include "Helper.hpp"
@@ -17,7 +18,6 @@ class HandlerSender1 {
 
 public:
 	PLSenderSend pss;
-	FLSenderReceive *fsrptr;
 
 	// Constructor named initialise, because we wanted to create a global object
 	HandlerSender1(unsigned long id, const char *outputPath, unsigned long num_messages_, unsigned long target_, const char *ip, unsigned short port, const char *ip_self, unsigned short port_self) : pss(id, ip, port){
@@ -26,8 +26,17 @@ public:
 		target = target_;
 	 
 		initReceiver(ip_self, port_self);
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		// std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
+
+	void initReceiver(const char *ip_self, unsigned short port_self){
+		Helper::printText("INITRECEIVING");
+		std::cout<<(this->pss).getSocket()<<std::endl;
+		std::unique_ptr<FLSenderReceive> fsr = std::make_unique<FLSenderReceive>(&((this->pss).s), (this->pss).getSocket(), ip_self, port_self);
+		// Transfers ownership
+		this -> fsrptr = std::move(fsr);
+	}
+
 
 
 	void startExchange(){
@@ -43,20 +52,13 @@ public:
 	}
 
 private:
-
+	std::unique_ptr<FLSenderReceive> fsrptr;
 	unsigned long num_messages;
 	unsigned long target;
 	bool receiver = false;
 	std::queue<std::pair<unsigned long, std::string> > logs;
 	unsigned thresh = 5;
 	const char *outPath;
-
-	void initReceiver(const char *ip_self, unsigned short port_self){
-		Helper::printText("INITRECEIVING");
-		std::cout<<(this->pss).getSocket()<<std::endl;
-		FLSenderReceive fsr(&((this->pss).s), (this->pss).getSocket(), ip_self, port_self);
-		this -> fsrptr = &fsr;
-	}
 
 	std::string createMsgAppendToLogs(unsigned long st, unsigned long en){
 		std::string payload = "";
