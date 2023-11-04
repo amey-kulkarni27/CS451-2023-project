@@ -32,6 +32,9 @@ public:
 	}
 
 	void fp2pSend(std::string msg){
+		Helper::printText(msg);
+		std::cout<<serverAddress.sin_port<<std::endl;
+		std::cout<<serverAddress.sin_addr.s_addr<<std::endl;
 		if(sendto(sock, msg.c_str(), msg.length(), 0, reinterpret_cast<struct sockaddr*>(&serverAddress), sizeof(serverAddress)) == -1)
 			perror("Error while sending the message.\n");
 	}

@@ -11,7 +11,8 @@
 class PLSenderReceive{
 	
 public:
-	PLSenderReceive(Stubborn x): s(x){
+	PLSenderReceive(Stubborn *x) {
+		s = x;
 	}
 
 	void pp2pReceive(std::string ackMsg){
@@ -21,12 +22,12 @@ public:
 		std::pair<std::set<unsigned long>::iterator,bool> ret; // store return value of insert
 		ret = acked.insert(ts);
 		if(ret.second)
-			(this->s).sp2pStop(ts);
+			(this->s) -> sp2pStop(ts);
 	}
 
 
 private:
-	Stubborn s;
+	Stubborn *s;
 	std::set<unsigned long> acked; // those messages that we have received an ACK for
 
 };

@@ -54,7 +54,7 @@ private:
 	const char *outPath;
 
 	void initReceiver(const char *ip_self, unsigned short port_self){
-		FLSenderReceive fsr((this->pss).s, (this->pss).getSocket(), ip_self, port_self);
+		FLSenderReceive fsr(&((this->pss).s), (this->pss).getSocket(), ip_self, port_self);
 		this -> fsrptr = &fsr;
 	}
 

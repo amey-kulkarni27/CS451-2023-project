@@ -15,7 +15,7 @@
 class FLSenderReceive{
 
 public:
-	FLSenderReceive(Stubborn s, int sock_, const char *ip_self, unsigned short port_self) : sock(sock_), psr(s){
+	FLSenderReceive(Stubborn *s, int sock_, const char *ip_self, unsigned short port_self) : sock(sock_), psr(s){
 
 		// bind listener
 		sockaddr_in myAddress;

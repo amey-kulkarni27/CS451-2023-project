@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <thread>
+#include <mutex>
 
 #include "parser.hpp"
 #include "Helper.hpp"
@@ -27,10 +28,14 @@ public:
 	}
 
 	void sp2pSend(unsigned long ts, std::string msg){
+		Helper::printText("SEND");
+		std::lock_guard<std::mutex> lock(mapLock);
 		tsToMsg[ts] = msg;
 	}
 
 	void sp2pStop(unsigned long ts){
+		Helper::printText("STOP");
+		std::lock_guard<std::mutex> lock(mapLock);
 		tsToMsg.erase(ts);
 	}
 
@@ -42,14 +47,25 @@ public:
 private:
 	FLSenderSend fss;
 	std::map<unsigned long, std::string> tsToMsg;
+	std::mutex mapLock;
 	bool keep_sending = true;
+
+	void flood(){
+		Helper::printText("FLOOD");
+		std::lock_guard<std::mutex> lock(mapLock);
+		for(const std::pair<unsigned long, std::string>& tm: tsToMsg){
+			Helper::printText("Printing");
+			std::cout<<tm.first<<std::endl;
+			Helper::printText(tm.second);
+			Helper::printText(this->tsToMsg[1]);
+			(this->fss).fp2pSend(tm.second);
+		}
+	}
 
 	void continuousSend(){
 		while(keep_sending){
-			Helper::printText("Printing");
-			for(const auto& tm: tsToMsg){
-				(this->fss).fp2pSend(tm.second);
-			}
+			std::cout<<tsToMsg.size()<<std::endl;
+			flood();
 		}
 	}
 };

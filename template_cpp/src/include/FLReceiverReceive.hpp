@@ -50,6 +50,7 @@ private:
 		socklen_t cAddrLen = sizeof(clientAddress);
 
 		while(listen){
+			Helper::printText("Come on!");
 			ssize_t readLen = recvfrom(sock, buffer, sizeof(buffer), 0, reinterpret_cast<struct sockaddr *>(&clientAddress), &cAddrLen);
 			Helper::printText("Finally");
 			std::cout<<readLen<<std::endl;
