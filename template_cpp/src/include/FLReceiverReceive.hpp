@@ -13,7 +13,7 @@
 class FLReceiverReceive{
 
 public:
-	FLReceiverReceive(const char *oPath, unsigned long Id, const char *ip, unsigned short port) : pr(oPath, Id){
+	FLReceiverReceive(const char *oPath, const char *ip, unsigned short port) : pr(oPath){
 		Helper::printText("FLReceiverReceive");
 		sock = (this->pr).getSocket();
 

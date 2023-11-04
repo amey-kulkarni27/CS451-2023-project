@@ -3,6 +3,8 @@
 #include <iostream>
 #include <string>
 #include <queue>
+#include <unordered_set>
+#include <unordered_map>
 
 #include "parser.hpp"
 #include "FLReceiverSend.hpp"
@@ -11,7 +13,7 @@
 class PLReceiver{
 	
 public:
-	PLReceiver(const char *oPath, unsigned long Id) : frs(), outPath(oPath), id(Id){
+	PLReceiver(const char *oPath) : frs(), outPath(oPath){
 		Helper::printText("PLReceiver!");
 	}
 
@@ -24,15 +26,18 @@ public:
 		// send corresponding ACK
 		// if this has not yet been delivered, deliver it
 		size_t firstUnderscore = msg.find('_');
-		std::string tsStr = msg.substr(0, firstUnderscore);
-		std::string msgWithoutId = msg.substr(firstUnderscore + 1); // there will always be something to the right of the first underscore
+		std::string idStr = msg.substr(0, firstUnderscore);
+		size_t secondUnderscore = msg.find('_', firstUnderscore + 1);
+		std::string tsStr = msg.substr(firstUnderscore + 1, secondUnderscore);
+		std::string msgWithoutId = msg.substr(secondUnderscore + 1); // there will always be something to the right of the second underscore
 		pp2pSend(tsStr, clientAddress);
+    unsigned long id = std::stoul(idStr);
     unsigned long ts = std::stoul(tsStr);
-    std::pair<std::set<unsigned long>::iterator,bool> ret; // store return value of insert
-    ret = delivered.insert(ts);
-    if(ret.second)
-			deliver(msgWithoutId);
+    if(delivered.find(id) == delivered.end() || delivered[id].find(ts) == delivered[id].end()){
+			delivered[id].insert(ts);
+			deliver(msgWithoutId, id);
 			// deliver the message
+		}
 	}
 
 	void stopAll(){
@@ -43,10 +48,9 @@ public:
 private:
 	FLReceiverSend frs;
 	const char *outPath;
-	unsigned long id;
-	std::set<unsigned long> delivered; // lighter to store numbers in the set rather than strings
+	std::unordered_map<unsigned long, std::unordered_set<unsigned long>> delivered;
 	Parser::Host self;
-	std::queue<std::string> logs;
+	std::queue<std::pair<unsigned long, std::string> > logs;
 	unsigned long thresh = 5;
 
 	void pp2pSend(std::string ts_str, sockaddr_in clientAddress){
@@ -54,7 +58,7 @@ private:
 		(this->frs).fp2pSend(ts_str, clientAddress);
 	}
 
-	void deliver(std::string msg){
+	void deliver(std::string msg, unsigned long id){
 		// 1) Spawn a thread to deal with it (optimisation)
 		// 2) Read the "_" separated messages (into strings) and log each of these messages into a queue
 
@@ -63,7 +67,7 @@ private:
 		size_t found = msg.find('_');
 		while(found != std::string::npos){
 			std::string underlying_msg = msg.substr(curpos, found - curpos);
-			logs.push(underlying_msg);
+			logs.push(make_pair(id, underlying_msg));
 			curpos = found + 1;
 			found = msg.find('_', curpos);
 		}
@@ -78,7 +82,7 @@ private:
 	}
 
 	void callFlush(){
-		Helper::flush(logs, outPath, id);
+		Helper::flush(logs, outPath, true);
 	}
 
 };

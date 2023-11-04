@@ -66,7 +66,7 @@ public:
 		return false;
 	}
 
-  static void flush(std::queue<std::string> &logs, const char *o_path, unsigned long id){
+  static void flush(std::queue<std::pair<unsigned long, std::string> > logs, const char *o_path, bool receiver){
 
 		// Convert const char * to string
 		std::string outPath(o_path);
@@ -86,8 +86,13 @@ public:
 
         // Append each underlying_msg from the logs to the file
         while (!logs.empty()) {
-            const std::string& underlying_msg = logs.front();
-            outputFile << underlying_msg << std::endl; // Append the underlying_msg to the file
+						const std::pair<unsigned long, std::string>  p = logs.front();
+						unsigned long id = p.first;
+            const std::string& underlying_msg = p.second;
+						if(receiver)
+							outputFile << "d " << std::to_string(id) << " " << underlying_msg << std::endl; // Append the underlying_msg to the file
+						else
+							outputFile << "b " << underlying_msg << std::endl; // Append the underlying_msg to the file
             logs.pop(); // Remove the processed underlying_msg from the queue
         }
     }
@@ -102,8 +107,13 @@ public:
 
         // Write each underlying_msg from the queue to the file
     while (!logs.empty()) {
-            const std::string& underlying_msg = logs.front();
-            outputFile << underlying_msg << std::endl; // Write the underlying_msg to the file
+						const std::pair<unsigned long, std::string>  p = logs.front();
+						unsigned long id = p.first;
+            const std::string& underlying_msg = p.second;
+						if(receiver)
+							outputFile << "d " << std::to_string(id) << " " << underlying_msg << std::endl; // Append the underlying_msg to the file
+						else
+							outputFile << "b " << underlying_msg << std::endl; // Append the underlying_msg to the file
             logs.pop(); // Remove the processed underlying_msg from the queue
         }
     }

@@ -18,9 +18,8 @@ class HandlerSender1 {
 public:
 
 	// Constructor named initialise, because we wanted to create a global object
-	HandlerSender1(unsigned long Id, const char *outputPath, unsigned long num_messages_, unsigned long target_, const char *ip, unsigned short port, const char *ip_self, unsigned short port_self) : pss(ip, port){
+	HandlerSender1(unsigned long id, const char *outputPath, unsigned long num_messages_, unsigned long target_, const char *ip, unsigned short port, const char *ip_self, unsigned short port_self) : pss(id, ip, port){
 		outPath = outputPath;
-		id = Id; 
 		num_messages = num_messages_;
 		target = target_;
 	 
@@ -45,11 +44,10 @@ private:
 	PLSenderSend pss;
 	FLSenderReceive *fsrptr;
 
-	unsigned long id;
 	unsigned long num_messages;
 	unsigned long target;
 	bool receiver = false;
-	std::queue<std::string> logs;
+	std::queue<std::pair<unsigned long, std::string> > logs;
 	unsigned thresh = 5;
 	const char *outPath;
 
@@ -62,7 +60,7 @@ private:
 		std::string payload = "";
 		while(st < en){
 			std::string msg = std::to_string(st);
-			logs.push(msg);
+			logs.push(make_pair(1, msg));
 			payload += msg + "_";
 			st++;
 		}
@@ -78,7 +76,7 @@ private:
 			std::string msgToSend = createMsgAppendToLogs(i, end);
 			(this->pss).pp2pSend(msgToSend);
 			// do this using a separate thread
-			Helper::flush(logs, outPath, id);
+			Helper::flush(logs, outPath, false);
 			i = end;
 		}
 

@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
 
 	unsigned long curId = parser.id();
 	if(curId == target){
-		HandlerReceiver1 h(curId, parser.outputPath(), targetDetails.ipReadable().c_str(), targetDetails.portReadable());
+		HandlerReceiver1 h(parser.outputPath(), targetDetails.ipReadable().c_str(), targetDetails.portReadable());
 		receivePtr = &h;
 	}
 	else{
