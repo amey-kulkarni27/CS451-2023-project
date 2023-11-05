@@ -29,10 +29,13 @@ public:
 		return sock;
 	}
 
-	void fp2pSend(std::string msg){
+	int fp2pSend(std::string msg){
 		if(sendto(sock, msg.c_str(), msg.length(), 0, reinterpret_cast<struct sockaddr*>(&serverAddress), sizeof(serverAddress)) == -1){
 			perror("Error while sending the message.\n");
+			return -1;
 		}
+		else
+			return 0;
 	}
 
 	void stopAll(){

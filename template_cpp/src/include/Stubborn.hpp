@@ -58,7 +58,8 @@ private:
 			return 0;
 		// std::cout<<"THREAD: "<<tsToMsg.size()<<std::endl;
 		for(auto const& [key, val]: tsToMsg){
-			(this->fss).fp2pSend(val);
+			if((this->fss).fp2pSend(val) == -1)
+				return 0;
 		}
 		return 1;
 	}
