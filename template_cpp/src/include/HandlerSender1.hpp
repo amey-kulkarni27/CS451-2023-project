@@ -65,7 +65,7 @@ private:
 	std::string filePath;
 	unsigned long num_messages;
 	unsigned long target;
-	const int MAX_QUEUE_SIZE = 1000000;
+	const int MAX_QUEUE_SIZE = 100000;
 	std::queue<std::pair<unsigned long, std::string> > logs;
   sem_t spotsLeft; // for the producer, writing to the logs
   sem_t spotsFilled; // for the consumer, writing from logs to text file
