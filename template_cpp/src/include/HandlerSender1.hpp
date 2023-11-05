@@ -5,6 +5,9 @@
 #include <map>
 #include <queue>
 #include <memory>
+#include <thread>
+#include <pthread.h>
+#include <semaphore.h>
 
 #include "parser.hpp" 
 #include "Helper.hpp"
@@ -20,13 +23,20 @@ public:
 	PLSenderSend pss;
 
 	// Constructor named initialise, because we wanted to create a global object
-	HandlerSender1(unsigned long id, const char *outputPath, unsigned long num_messages_, unsigned long target_, const char *ip, unsigned short port, const char *ip_self, unsigned short port_self) : pss(id, ip, port){
-		outPath = outputPath;
+	HandlerSender1(unsigned long id, const char *outputPath, unsigned long num_messages_, unsigned long target_, const char *ip, unsigned short port, const char *ip_self, unsigned short port_self) : pss(id, ip, port), filePath(outputPath), outputFile(filePath){
 		num_messages = num_messages_;
 		target = target_;
-	 
+
 		initReceiver(ip_self, port_self);
-		// std::this_thread::sleep_for(std::chrono::seconds(1));
+
+		createFile();
+		pthread_mutex_init(&logsLock, NULL);
+    sem_init(&spotsLeft, 0, MAX_QUEUE_SIZE);
+    sem_init(&spotsFilled, 0, 0);
+
+		// Create a consumer thread for writing the logs into the file
+    std::thread consumerThread(&HandlerSender1::flush, this);
+    consumerThread.detach();
 	}
 
 	void initReceiver(const char *ip_self, unsigned short port_self){
@@ -44,26 +54,71 @@ public:
 
 	void stopExchange(){
 		// stop perfect links
-		Helper::flush(logs, outPath, false);
-		(this->pss).stopAll();
 		(this->fsrptr) -> stopAll();
-
+		(this->pss).stopAll();
+		flushing = false;
+		emptyLogs();
 	}
 
 private:
 	std::unique_ptr<FLSenderReceive> fsrptr;
+	std::string filePath;
 	unsigned long num_messages;
 	unsigned long target;
-	bool receiver = false;
+	const int MAX_QUEUE_SIZE = 1000000;
 	std::queue<std::pair<unsigned long, std::string> > logs;
-	unsigned thresh = 500;
-	const char *outPath;
+  sem_t spotsLeft; // for the producer, writing to the logs
+  sem_t spotsFilled; // for the consumer, writing from logs to text file
+  pthread_mutex_t logsLock;
+  std::ofstream outputFile;
+  bool flushing = true;
+
+  void createFile(){
+
+      if (!outputFile.is_open()) {
+          std::cerr << "Error creating the file: " << filePath << std::endl;
+          return;
+      }
+  }
+
+   void emptyLogs(){
+		 while(!logs.empty()){
+			 sem_wait(&spotsFilled);
+			 pthread_mutex_lock(&logsLock);
+			 const std::pair<unsigned long, std::string>  p = logs.front();
+			 unsigned long id = p.first;
+			 const std::string& underlying_msg = p.second;
+			 outputFile << "b " << underlying_msg << std::endl; // Append the underlying_msg to the file
+			 logs.pop(); // Remove the processed underlying_msg from the queue
+			 pthread_mutex_unlock(&logsLock);
+			 sem_post(&spotsLeft); // one more spot becomes available
+		 }
+ }
+
+   void flush(){
+		 while(flushing){
+			 sem_wait(&spotsFilled);
+			 pthread_mutex_lock(&logsLock);
+			 const std::pair<unsigned long, std::string>  p = logs.front();
+			 unsigned long id = p.first;
+			 const std::string& underlying_msg = p.second;
+			 outputFile << "b " << underlying_msg << std::endl; // Append the underlying_msg to the file
+			 logs.pop(); // Remove the processed underlying_msg from the queue
+			 pthread_mutex_unlock(&logsLock);
+			 sem_post(&spotsLeft); // one more spot becomes available
+		 }
+ }
+
 
 	std::string createMsgAppendToLogs(unsigned long st, unsigned long en){
 		std::string payload = "";
 		while(st < en){
 			std::string msg = std::to_string(st);
+			sem_wait(&spotsLeft);
+			pthread_mutex_lock(&logsLock);
 			logs.push(make_pair(1, msg));
+			pthread_mutex_unlock(&logsLock);
+			sem_post(&spotsFilled);
 			payload += msg + "_";
 			st++;
 		}
@@ -78,8 +133,6 @@ private:
 			unsigned long end = std::min(i + 8, num_messages + 1);
 			std::string msgToSend = createMsgAppendToLogs(i, end);
 			(this->pss).pp2pSend(msgToSend);
-			// do this using a separate thread
-			Helper::flush(logs, outPath, false);
 			i = end;
 		}
 		

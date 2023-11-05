@@ -64,7 +64,7 @@ private:
 	std::string filePath;
 	std::unordered_map<unsigned long, std::unordered_set<unsigned long>> delivered;
 	Parser::Host self;
-	const int MAX_QUEUE_SIZE = 1000;
+	const int MAX_QUEUE_SIZE = 200000;
 	std::queue<std::pair<unsigned long, std::string> > logs;
 	sem_t spotsLeft; // for the producer, writing to the logs
 	sem_t spotsFilled; // for the consumer, writing from logs to text file
