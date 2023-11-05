@@ -29,6 +29,13 @@ public:
 		consumerThread.detach();
 	}
 
+	~PLReceiver(){
+		sem_destroy(&spotsLeft);
+		sem_destroy(&spotsFilled);
+		pthread_mutex_destroy(&logsLock);
+
+	}
+
 	int getSocket(){
 		return (this->frs).getSocket();
 	}

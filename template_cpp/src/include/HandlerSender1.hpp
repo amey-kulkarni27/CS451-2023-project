@@ -39,10 +39,15 @@ public:
     consumerThread.detach();
 	}
 
+	~HandlerSender1(){
+		 sem_destroy(&spotsLeft);
+		 sem_destroy(&spotsFilled);
+		 pthread_mutex_destroy(&logsLock);
+	}
+
+
 	void initReceiver(const char *ip_self, unsigned short port_self){
-		std::unique_ptr<FLSenderReceive> fsr = std::make_unique<FLSenderReceive>(&((this->pss).s), (this->pss).getSocket(), ip_self, port_self);
-		// Transfers ownership
-		this -> fsrptr = std::move(fsr);
+		this -> fsrptr= std::make_unique<FLSenderReceive>(&((this->pss).s), (this->pss).getSocket(), ip_self, port_self);
 	}
 
 
