@@ -5,15 +5,28 @@
 #include <queue>
 #include <unordered_set>
 #include <unordered_map>
+#include <thread>
+#include <pthread.h>
+#include <semaphore.h>
 
 #include "parser.hpp"
 #include "FLReceiverSend.hpp"
 #include "Helper.hpp"
 
+
+
 class PLReceiver{
 	
 public:
-	PLReceiver(const char *oPath) : frs(), outPath(oPath){
+	PLReceiver(const char *oPath) : frs(), filePath(oPath), outputFile(filePath){
+		createFile();
+		pthread_mutex_init(&logsLock, NULL);
+		sem_init(&spotsLeft, 0, MAX_QUEUE_SIZE);
+		sem_init(&spotsFilled, 0, 0);
+
+		// Create a consumer thread for writing the logs into the file
+		std::thread consumerThread(&PLReceiver::flush, this);
+		consumerThread.detach();
 	}
 
 	int getSocket(){
@@ -40,17 +53,61 @@ public:
 	}
 
 	void stopAll(){
-		callFlush();
+		flushing = false;
+		// stop running the other thread
+		emptyLogs();
 	}
 
 
 private:
 	FLReceiverSend frs;
-	const char *outPath;
+	std::string filePath;
 	std::unordered_map<unsigned long, std::unordered_set<unsigned long>> delivered;
 	Parser::Host self;
+	const int MAX_QUEUE_SIZE = 1000;
 	std::queue<std::pair<unsigned long, std::string> > logs;
-	unsigned long thresh = 1000;
+	sem_t spotsLeft; // for the producer, writing to the logs
+	sem_t spotsFilled; // for the consumer, writing from logs to text file
+	pthread_mutex_t logsLock;
+	std::ofstream outputFile;
+	bool flushing = true;
+
+	void createFile(){
+
+			if (!outputFile.is_open()) {
+					std::cerr << "Error creating the file: " << filePath << std::endl;
+					return;
+			}
+	}
+
+	void emptyLogs(){
+		while(!logs.empty()){
+			sem_wait(&spotsFilled);
+			pthread_mutex_lock(&logsLock);
+			const std::pair<unsigned long, std::string>  p = logs.front();
+			unsigned long id = p.first;
+			const std::string& underlying_msg = p.second;
+			outputFile << "d " << std::to_string(id) << " " << underlying_msg << std::endl; // Append the underlying_msg to the file
+			logs.pop(); // Remove the processed underlying_msg from the queue
+			pthread_mutex_unlock(&logsLock);
+			sem_post(&spotsLeft); // one more spot becomes available
+		}
+	}
+
+  void flush(){
+		// Append each underlying_msg from the logs to the file
+		while (flushing) {
+			sem_wait(&spotsFilled);
+			pthread_mutex_lock(&logsLock);
+			const std::pair<unsigned long, std::string>  p = logs.front();
+			unsigned long id = p.first;
+			const std::string& underlying_msg = p.second;
+			outputFile << "d " << std::to_string(id) << " " << underlying_msg << std::endl; // Append the underlying_msg to the file
+			logs.pop(); // Remove the processed underlying_msg from the queue
+			pthread_mutex_unlock(&logsLock);
+			sem_post(&spotsLeft); // one more spot becomes available
+		}
+  }
 
 	void pp2pSend(std::string ts_str, sockaddr_in clientAddress){
 		// send an ack, ie, just a timestamp
@@ -66,12 +123,14 @@ private:
 		size_t found = msg.find('_');
 		while(found != std::string::npos){
 			std::string underlying_msg = msg.substr(curpos, found - curpos);
+			sem_wait(&spotsLeft);
+			pthread_mutex_lock(&logsLock);
 			logs.push(make_pair(id, underlying_msg));
+			pthread_mutex_unlock(&logsLock);
+			sem_post(&spotsFilled);
 			curpos = found + 1;
 			found = msg.find('_', curpos);
 		}
-		if(logs.size() >= thresh)
-			callFlush();
 
 		// Perfect Links
 		// receive packet, resend an ACK
@@ -81,7 +140,6 @@ private:
 	}
 
 	void callFlush(){
-		Helper::flush(logs, outPath, true);
 	}
 
 };
