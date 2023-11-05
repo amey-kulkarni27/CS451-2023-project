@@ -70,6 +70,6 @@ private:
 			if(flood() == 0)
 				std::this_thread::sleep_for(std::chrono::nanoseconds(10));
 		}
-		Helper::printText("Cont Send Thread terminates");
+		// Helper::printText("Cont Send Thread terminates");
 	}
 };
